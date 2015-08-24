@@ -214,6 +214,45 @@ function Board (width, heigth) {
 	this.printBoard = function () {
 		draw_hexmap (this.width, this.heigth, 20);
 	}
+
+	this.getImpassable = function () {
+		var tiles = [];
+		var callback = function (tile, index) {
+			if (tile.impassable === true) {
+				tiles.push([i, index]);
+			}			
+		}
+		for (var i = 0; i < this.board.length; i++) {
+			this.board[i].map(callback);
+		};
+		console.log (tiles, tiles.length);
+	}
+
+	this.getWaterholes = function () {
+		var tiles = [];
+		var callback = function (tile, index) {
+			if (typeof tile.waterhole === 'number') {
+				tiles.push([i, index]);
+			}			
+		}
+		for (var i = 0; i < this.board.length; i++) {
+			this.board[i].map(callback);
+		};
+		console.log (tiles, tiles.length);
+	}
+
+	this.getOasis = function () {
+		var tiles = [];
+		var callback = function (tile, index) {
+			if (tile.oasis === true) {
+				tiles.push([i, index]);
+			}			
+		}
+		for (var i = 0; i < this.board.length; i++) {
+			this.board[i].map(callback);
+		};
+		console.log (tiles, tiles.length);
+	}
 }
 
 
@@ -239,6 +278,8 @@ function draw_hexagon (x, y, side) {
     	path.lineTo((Math.cos(Math.PI * 7 / 3) * side_length) + center_x, ((Math.sin(Math.PI * 7 / 3) * side_length) + center_y));
 
     	ctx.stroke(path);
+    	ctx.fillStyle = "#BA8";
+    	ctx.fill(path);
 	}
 }
 
@@ -254,14 +295,14 @@ function draw_hexmap (width, height, tilesize) {
 
 			if (i % 2 > 0) {
 						
-				console.log ('uneven!');
+				/*console.log ('uneven!');*/
 				var x = i * tilesize * 2 + tilesize;
 				var y = j * tilesize * 2 + tilesize + tilesize;
 				draw_hexagon(x, y, tilesize);
 
 			} else {
 						
-				console.log ('even!');
+				/*console.log ('even!');*/
 				var x = i * tilesize * 2 + tilesize;
 				var y = j * tilesize * 2 + tilesize;
 				draw_hexagon(x, y, tilesize);
