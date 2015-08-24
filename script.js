@@ -193,6 +193,8 @@ function Board (width, heigth) {
 	// Transform an array of rows in a Board object made of list of Tile objects
 	
 	this.board = [];
+	this.width = width;
+	this.heigth = heigth;
 
 	for (var i = 0; i < width; i++) {
 		var column = [];
@@ -207,6 +209,10 @@ function Board (width, heigth) {
 		console.log(arr, arr[0], arr[1]);
 		// Takes an array of coordinates and returns the corresponding Tile object
 		return this.board[arr[0]][arr[1]];
+	}
+
+	this.printBoard = function () {
+		draw_hexmap (this.width, this.heigth, 20);
 	}
 }
 
@@ -236,7 +242,12 @@ function draw_hexagon (x, y, side) {
 	}
 }
 
-function draw_hexmap (height, width, tilesize) {
+function draw_hexmap (width, height, tilesize) {
+	
+	if (typeof width != 'number' || typeof height != 'number' || typeof tilesize != 'number') {
+		throw "draw_hexmap: invalid argument";
+	};
+
 	for (var i = 0; i < width; i++) {
 
 		for (var j = 0; j < height; j++) {
@@ -261,3 +272,5 @@ function draw_hexmap (height, width, tilesize) {
 }
 
 // EVENT HANDLERS
+
+document.body.onload = BOARD.printBoard.bind(BOARD);
