@@ -190,7 +190,9 @@ function prepareMap () {
 	setImpassable();
 	var splice = setOasis()[0];
 	setWaterholes(splice);
-	draw_oasis('#AAA');
+	draw_impassable('#333');
+	draw_oasis('#4F4');
+	draw_waterholes();
 }
 
 
@@ -207,7 +209,7 @@ function Board (width, heigth) {
 	this.board = [];
 	this.width = width;
 	this.heigth = heigth;
-	this.tilesize = 24;
+	this.tilesize = 35;
 
 	for (var i = 0; i < width; i++) {
 		var column = [];
@@ -331,6 +333,7 @@ function draw_hexmap (width, height, tilesize, fill) {
 }
 
 function draw_oasis (fill) {
+
 	var arr = BOARD.getOasis();
 	
 	if (typeof arr[0][1] != 'number' || typeof BOARD.tilesize != 'number') {
@@ -383,6 +386,56 @@ function draw_impassable (fill) {
 
 		}
 	};
+}
+
+function draw_waterholes () {
+	var holes = BOARD.getWaterholes();
+	console.log(holes);
+	holes.map(drawNumber);
+}
+
+function drawNumber (tile) {
+
+	var circumradius = BOARD.tilesize * 0.6;
+
+	var canvas = document.getElementById('board');
+
+	if (tile[0] % 2 > 0) {
+
+		var ctx = canvas.getContext('2d');
+
+		var center_x = tile[0] * 1.75 * BOARD.tilesize + BOARD.tilesize;
+		var center_y = tile[1] * 2 * BOARD.tilesize + BOARD.tilesize * 2;
+
+		var origin_x = (Math.cos(Math.PI * 6 / 8) * circumradius) + center_x;
+		var origin_y = (Math.sin(Math.PI * 3 / 8) * circumradius) + center_y;
+
+		var end_x = Math.abs(origin_x - ((Math.cos(Math.PI * 1 / 3) * circumradius) + center_x));
+		
+		ctx.fillStyle = 'blue';
+
+    	ctx.font = end_x * 2 + 'px serif';
+    	ctx.fillText('' + tile[2],  origin_x, origin_y);   	
+
+	} else {
+
+		var ctx = canvas.getContext('2d');
+
+		var center_x = tile[0] * 1.75 * BOARD.tilesize + BOARD.tilesize;
+		var center_y = tile[1] * 2 * BOARD.tilesize + BOARD.tilesize;
+
+		var origin_x = (Math.cos(Math.PI * 6 / 8) * circumradius) + center_x;
+		var origin_y = (Math.sin(Math.PI * 3 / 8) * circumradius) + center_y;
+
+		var end_x = Math.abs(origin_x - ((Math.cos(Math.PI * 1 / 3) * circumradius) + center_x));
+		
+		ctx.fillStyle = 'blue';
+
+    	ctx.font = end_x * 2 + 'px serif';
+    	ctx.fillText('' + tile[2],  origin_x, origin_y);   
+
+	
+	}
 }
 
 // function draw_waterhole (fill) {
