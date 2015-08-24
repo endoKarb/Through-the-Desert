@@ -141,7 +141,7 @@ function setOasis () {
 			var rnd = Math.floor(Math.random()*6);
 			var loc = OASIS_TILES.slice(0);
 			var splice = loc.splice(rnd, 1);
-			
+
 			for (var i = 0; i < loc.length; i++) {
 				BOARD.getTile(loc[i]).oasis = true;
 				console.log(BOARD.getTile(loc[i]));
@@ -149,7 +149,7 @@ function setOasis () {
 			};
 			// console.log(splice);
 			FLAGS.oasis = true;
-			return splice;	
+			return splice;
 			break;
 
 		case true:
@@ -165,7 +165,7 @@ function setWaterholes (arr) {
 	switch (FLAGS.waterhole) {
 
 		case false:
-			
+
 			var holes = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, ];
 			var loc = WATERHOLES_TILES.slice(0);
 			loc.push(arr);
@@ -203,17 +203,17 @@ function Tile () {
 	this.waterhole = false;
 }
 
-function Board (width, heigth) {
+function Board (width, height) {
 	// Transform an array of rows in a Board object made of list of Tile objects
-	
+
 	this.board = [];
 	this.width = width;
-	this.heigth = heigth;
+	this.height = height;
 	this.tilesize = 35;
 
 	for (var i = 0; i < width; i++) {
 		var column = [];
-		for (var j = 0; j < heigth; j++) {
+		for (var j = 0; j < height; j++) {
 			column.push(new Tile);
 		};
 		this.board.push(column);
@@ -227,7 +227,7 @@ function Board (width, heigth) {
 	}
 
 	this.printBoard = function () {
-		draw_hexmap (this.width, this.heigth, this.tilesize, "#BA8");
+		draw_hexmap (this.width, this.height, this.tilesize, "#BA8");
 	}
 
 	this.getImpassable = function () {
@@ -235,7 +235,7 @@ function Board (width, heigth) {
 		var callback = function (tile, index) {
 			if (tile.impassable === true) {
 				tiles.push([i, index]);
-			}			
+			}
 		}
 		for (var i = 0; i < this.board.length; i++) {
 			this.board[i].map(callback);
@@ -248,7 +248,7 @@ function Board (width, heigth) {
 		var callback = function (tile, index) {
 			if (typeof tile.waterhole === 'number') {
 				tiles.push([i, index, tile.waterhole]);
-			}			
+			}
 		}
 		for (var i = 0; i < this.board.length; i++) {
 			this.board[i].map(callback);
@@ -261,7 +261,7 @@ function Board (width, heigth) {
 		var callback = function (tile, index) {
 			if (tile.oasis === true) {
 				tiles.push([i, index]);
-			}			
+			}
 		}
 		for (var i = 0; i < this.board.length; i++) {
 			this.board[i].map(callback);
@@ -304,7 +304,7 @@ function draw_hexagon (x, y, cirumradius, fill) {
 }
 
 function draw_hexmap (width, height, tilesize, fill) {
-	
+
 	if (typeof width != 'number' || typeof height != 'number' || typeof tilesize != 'number') {
 		throw "draw_hexmap: invalid argument";
 	};
@@ -314,14 +314,14 @@ function draw_hexmap (width, height, tilesize, fill) {
 		for (var j = 0; j < height; j++) {
 
 			if (i % 2 > 0) {
-						
+
 				/*console.log ('uneven!');*/
 				var x = i * tilesize * 1.75 + tilesize;
 				var y = j * tilesize * 2 + tilesize + tilesize;
 				draw_hexagon(x, y, tilesize, fill);
 
 			} else {
-						
+
 				/*console.log ('even!');*/
 				var x = i * tilesize * 1.75 + tilesize;
 				var y = j * tilesize * 2 + tilesize;
@@ -335,7 +335,7 @@ function draw_hexmap (width, height, tilesize, fill) {
 function draw_oasis (fill) {
 
 	var arr = BOARD.getOasis();
-	
+
 	if (typeof arr[0][1] != 'number' || typeof BOARD.tilesize != 'number') {
 		throw 'draw_hexmap: invalid argument';
 	};
@@ -343,14 +343,14 @@ function draw_oasis (fill) {
 	for (var i = 0; i < arr.length; i++) {
 
 		if (arr[i][0] % 2 > 0) {
-					
+
 			/*console.log ('uneven!');*/
 			var x = arr[i][0] * BOARD.tilesize * 1.75 + BOARD.tilesize;
 			var y = arr[i][1] * BOARD.tilesize * 2 + BOARD.tilesize + BOARD.tilesize;
 			draw_hexagon(x, y, BOARD.tilesize, fill);
 
 		} else {
-					
+
 			/*console.log ('even!');*/
 			var x = arr[i][0] * BOARD.tilesize * 1.75 + BOARD.tilesize;
 			var y = arr[i][1] * BOARD.tilesize * 2 + BOARD.tilesize;
@@ -363,7 +363,7 @@ function draw_oasis (fill) {
 function draw_impassable (fill) {
 
 	var arr = BOARD.getImpassable();
-	
+
 	if (typeof arr[0][1] != 'number' || typeof BOARD.tilesize != 'number') {
 		throw 'draw_hexmap: invalid argument';
 	};
@@ -371,14 +371,14 @@ function draw_impassable (fill) {
 	for (var i = 0; i < arr.length; i++) {
 
 		if (arr[i][0] % 2 > 0) {
-					
+
 			/*console.log ('uneven!');*/
 			var x = arr[i][0] * BOARD.tilesize * 1.75 + BOARD.tilesize;
 			var y = arr[i][1] * BOARD.tilesize * 2 + BOARD.tilesize + BOARD.tilesize;
 			draw_hexagon(x, y, BOARD.tilesize, fill);
 
 		} else {
-					
+
 			/*console.log ('even!');*/
 			var x = arr[i][0] * BOARD.tilesize * 1.75 + BOARD.tilesize;
 			var y = arr[i][1] * BOARD.tilesize * 2 + BOARD.tilesize;
@@ -399,49 +399,27 @@ function drawNumber (tile) {
 	var circumradius = BOARD.tilesize * 0.6;
 
 	var canvas = document.getElementById('board');
+    var ctx = canvas.getContext('2d');
 
-	if (tile[0] % 2 > 0) {
+	var center_x = tile[0] * 1.75 * BOARD.tilesize + BOARD.tilesize;
+	var center_y = tile[1] * 2 * BOARD.tilesize + BOARD.tilesize * ((tile[0] % 2 > 0) ? 2 : 1);
 
-		var ctx = canvas.getContext('2d');
+	var origin_x = (Math.cos(Math.PI * 6 / 8) * circumradius) + center_x;
+	var origin_y = (Math.sin(Math.PI * 3 / 8) * circumradius) + center_y;
 
-		var center_x = tile[0] * 1.75 * BOARD.tilesize + BOARD.tilesize;
-		var center_y = tile[1] * 2 * BOARD.tilesize + BOARD.tilesize * 2;
+	var end_x = Math.abs(origin_x - ((Math.cos(Math.PI * 1 / 3) * circumradius) + center_x));
 
-		var origin_x = (Math.cos(Math.PI * 6 / 8) * circumradius) + center_x;
-		var origin_y = (Math.sin(Math.PI * 3 / 8) * circumradius) + center_y;
+	ctx.fillStyle = 'blue';
 
-		var end_x = Math.abs(origin_x - ((Math.cos(Math.PI * 1 / 3) * circumradius) + center_x));
-		
-		ctx.fillStyle = 'blue';
+	ctx.font = end_x * 2 + 'px Helvetica, sans-serif';
+	ctx.fillText('' + tile[2],  origin_x, origin_y);
 
-    	ctx.font = end_x * 2 + 'px serif';
-    	ctx.fillText('' + tile[2],  origin_x, origin_y);   	
-
-	} else {
-
-		var ctx = canvas.getContext('2d');
-
-		var center_x = tile[0] * 1.75 * BOARD.tilesize + BOARD.tilesize;
-		var center_y = tile[1] * 2 * BOARD.tilesize + BOARD.tilesize;
-
-		var origin_x = (Math.cos(Math.PI * 6 / 8) * circumradius) + center_x;
-		var origin_y = (Math.sin(Math.PI * 3 / 8) * circumradius) + center_y;
-
-		var end_x = Math.abs(origin_x - ((Math.cos(Math.PI * 1 / 3) * circumradius) + center_x));
-		
-		ctx.fillStyle = 'blue';
-
-    	ctx.font = end_x * 2 + 'px serif';
-    	ctx.fillText('' + tile[2],  origin_x, origin_y);   
-
-	
-	}
 }
 
 // function draw_waterhole (fill) {
 
 // 	var arr = BOARD.getImpassable();
-	
+
 // 	if (typeof arr[0][1] != 'number' || typeof BOARD.tilesize != 'number') {
 // 		throw 'draw_hexmap: invalid argument';
 // 	};
@@ -449,14 +427,14 @@ function drawNumber (tile) {
 // 	for (var i = 0; i < arr.length; i++) {
 
 // 		if (arr[i][0] % 2 > 0) {
-					
+
 // 			/*console.log ('uneven!');*/
 // 			var x = arr[i][0] * BOARD.tilesize * 2 + BOARD.tilesize;
 // 			var y = arr[i][1] * BOARD.tilesize * 2 + BOARD.tilesize + BOARD.tilesize;
 // 			draw_hexagon(x, y, BOARD.tilesize, fill);
 
 // 		} else {
-					
+
 // 			/*console.log ('even!');*/
 // 			var x = arr[i][0] * BOARD.tilesize * 2 + BOARD.tilesize;
 // 			var y = arr[i][1] * BOARD.tilesize * 2 + BOARD.tilesize;
