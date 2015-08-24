@@ -409,40 +409,53 @@ function drawNumber (tile) {
 
 	var end_x = Math.abs(origin_x - ((Math.cos(Math.PI * 1 / 3) * circumradius) + center_x));
 
-	ctx.fillStyle = 'blue';
+	ctx.fillStyle = '#46A';
 
 	ctx.font = end_x * 2 + 'px Helvetica, sans-serif';
 	ctx.fillText('' + tile[2],  origin_x, origin_y);
 
 }
 
-// function draw_waterhole (fill) {
+var PUNTI = [
+	[0,0],
+	[100,12],
+	[55,12],
+	[500,1],
+	[4,990],
+	[43,200]
+]
 
-// 	var arr = BOARD.getImpassable();
+function closestPoint (arr) {
+	var distances = [];
+	for (var i = 0; i < PUNTI.length; i++) {
+		distances.push(PITAGORA(arr, PUNTI[i]));
+	};
+	console.log(PUNTI[findSmallest(distances)])
+}
 
-// 	if (typeof arr[0][1] != 'number' || typeof BOARD.tilesize != 'number') {
-// 		throw 'draw_hexmap: invalid argument';
-// 	};
+function findSmallest (arr) {
+	var list = arr;
+	var gindex = 0;
+	var callback = function (acc, current, index) {
+		if (acc <= current) {
+			return acc;
+		} else {
+			gindex = index
+			return current;
+		}
+	}
+	console.log('dist:', list.reduce(callback), '#:', gindex);
+	return gindex;
+}
 
-// 	for (var i = 0; i < arr.length; i++) {
-
-// 		if (arr[i][0] % 2 > 0) {
-
-// 			/*console.log ('uneven!');*/
-// 			var x = arr[i][0] * BOARD.tilesize * 2 + BOARD.tilesize;
-// 			var y = arr[i][1] * BOARD.tilesize * 2 + BOARD.tilesize + BOARD.tilesize;
-// 			draw_hexagon(x, y, BOARD.tilesize, fill);
-
-// 		} else {
-
-// 			/*console.log ('even!');*/
-// 			var x = arr[i][0] * BOARD.tilesize * 2 + BOARD.tilesize;
-// 			var y = arr[i][1] * BOARD.tilesize * 2 + BOARD.tilesize;
-// 			draw_hexagon(x, y, BOARD.tilesize, fill);
-
-// 		}
-// 	};
-// }
+function PITAGORA (arr, arr2) {
+	var point1 = [arr[0], arr[1]];
+	var point2 = [arr2[0], arr2[1]];
+	var x1x2 = Math.abs(point1[0] - point2[0]);
+	var y1y2 = Math.abs(point1[1] - point2[1]);
+	// console.log (Math.sqrt(Math.pow(x1x2, 2) + Math.pow(y1y2, 2)));
+	return Math.sqrt(Math.pow(x1x2, 2) + Math.pow(y1y2, 2));
+}
 
 
 // #########################################################################
@@ -452,4 +465,11 @@ function drawNumber (tile) {
 // #########################################################################
 
 
+function testClick (ev) {
+	console.log('clickCoor', ev.layerX, ev.layerY);
+	var cor = [ev.layerX, ev.layerY];
+	closestPoint(cor);
+	// return [ev.layerX, ev.layerY];
+}
+document.querySelector('canvas').addEventListener('click', testClick);
 document.body.onload = prepareMap;
