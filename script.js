@@ -144,6 +144,7 @@ function setOasis () {
 			break;
 
 		case true:
+			throw 'Oasis already generated';
 			break;
 	}
 }
@@ -176,9 +177,11 @@ function setWaterholes (arr) {
 }
 
 function prepareMap () {
+	BOARD.printBoard();
 	setImpassable();
-	var splice = setOasis()[0]
+	var splice = setOasis()[0];
 	setWaterholes(splice);
+	draw_oasis('#AAA');
 }
 
 function Tile () {
@@ -195,6 +198,7 @@ function Board (width, heigth) {
 	this.board = [];
 	this.width = width;
 	this.heigth = heigth;
+	this.tilesize = 24;
 
 	for (var i = 0; i < width; i++) {
 		var column = [];
@@ -212,7 +216,7 @@ function Board (width, heigth) {
 	}
 
 	this.printBoard = function () {
-		draw_hexmap (this.width, this.heigth, 20);
+		draw_hexmap (this.width, this.heigth, this.tilesize, "#BA8");
 	}
 
 	this.getImpassable = function () {
@@ -225,7 +229,7 @@ function Board (width, heigth) {
 		for (var i = 0; i < this.board.length; i++) {
 			this.board[i].map(callback);
 		};
-		console.log (tiles, tiles.length);
+		return tiles;
 	}
 
 	this.getWaterholes = function () {
@@ -238,7 +242,7 @@ function Board (width, heigth) {
 		for (var i = 0; i < this.board.length; i++) {
 			this.board[i].map(callback);
 		};
-		console.log (tiles, tiles.length);
+		return tiles;
 	}
 
 	this.getOasis = function () {
@@ -251,13 +255,13 @@ function Board (width, heigth) {
 		for (var i = 0; i < this.board.length; i++) {
 			this.board[i].map(callback);
 		};
-		console.log (tiles, tiles.length);
+		return tiles;
 	}
 }
 
 
 
-function draw_hexagon (x, y, side) {
+function draw_hexagon (x, y, side, fill) {
 
 	var canvas = document.getElementById('board');
 
@@ -278,12 +282,12 @@ function draw_hexagon (x, y, side) {
     	path.lineTo((Math.cos(Math.PI * 7 / 3) * side_length) + center_x, ((Math.sin(Math.PI * 7 / 3) * side_length) + center_y));
 
     	ctx.stroke(path);
-    	ctx.fillStyle = "#BA8";
+    	ctx.fillStyle = fill;
     	ctx.fill(path);
 	}
 }
 
-function draw_hexmap (width, height, tilesize) {
+function draw_hexmap (width, height, tilesize, fill) {
 	
 	if (typeof width != 'number' || typeof height != 'number' || typeof tilesize != 'number') {
 		throw "draw_hexmap: invalid argument";
@@ -298,20 +302,75 @@ function draw_hexmap (width, height, tilesize) {
 				/*console.log ('uneven!');*/
 				var x = i * tilesize * 2 + tilesize;
 				var y = j * tilesize * 2 + tilesize + tilesize;
-				draw_hexagon(x, y, tilesize);
+				draw_hexagon(x, y, tilesize, fill);
 
 			} else {
 						
 				/*console.log ('even!');*/
 				var x = i * tilesize * 2 + tilesize;
 				var y = j * tilesize * 2 + tilesize;
-				draw_hexagon(x, y, tilesize);
+				draw_hexagon(x, y, tilesize, fill);
 
 			}
 		};
 	};
 }
 
+function draw_oasis (fill) {
+	var arr = BOARD.getOasis();
+	
+	if (typeof arr[0][1] != 'number' || typeof BOARD.tilesize != 'number') {
+		throw 'draw_hexmap: invalid argument';
+	};
+
+	for (var i = 0; i < arr.length; i++) {
+
+		if (arr[i][0] % 2 > 0) {
+					
+			/*console.log ('uneven!');*/
+			var x = arr[i][0] * BOARD.tilesize * 2 + BOARD.tilesize;
+			var y = arr[i][1] * BOARD.tilesize * 2 + BOARD.tilesize + BOARD.tilesize;
+			draw_hexagon(x, y, BOARD.tilesize, fill);
+
+		} else {
+					
+			/*console.log ('even!');*/
+			var x = arr[i][0] * BOARD.tilesize * 2 + BOARD.tilesize;
+			var y = arr[i][1] * BOARD.tilesize * 2 + BOARD.tilesize;
+			draw_hexagon(x, y, BOARD.tilesize, fill);
+
+		}
+	};
+}
+
+function draw_impassable (fill) {
+
+	var arr = BOARD.getImpassable();
+	
+	if (typeof arr[0][1] != 'number' || typeof BOARD.tilesize != 'number') {
+		throw 'draw_hexmap: invalid argument';
+	};
+
+	for (var i = 0; i < arr.length; i++) {
+
+		if (arr[i][0] % 2 > 0) {
+					
+			/*console.log ('uneven!');*/
+			var x = arr[i][0] * BOARD.tilesize * 2 + BOARD.tilesize;
+			var y = arr[i][1] * BOARD.tilesize * 2 + BOARD.tilesize + BOARD.tilesize;
+			draw_hexagon(x, y, BOARD.tilesize, fill);
+
+		} else {
+					
+			/*console.log ('even!');*/
+			var x = arr[i][0] * BOARD.tilesize * 2 + BOARD.tilesize;
+			var y = arr[i][1] * BOARD.tilesize * 2 + BOARD.tilesize;
+			draw_hexagon(x, y, BOARD.tilesize, fill);
+
+		}
+	};
+}
+
 // EVENT HANDLERS
 
-document.body.onload = BOARD.printBoard.bind(BOARD);
+document.body.onload = prepareMap;
