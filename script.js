@@ -100,7 +100,16 @@ var FLAGS = {
 	'waterhole': false
 };
 
+
 var BOARD = new Board(18, 13);
+
+
+
+// #########################################################################
+// ##																	  ##
+// ##						   	BOARD GENERATION						  ##
+// ##																	  ##
+// #########################################################################
 
 
 function setImpassable () {
@@ -184,12 +193,12 @@ function prepareMap () {
 	draw_oasis('#AAA');
 }
 
-function Tile () {
 
+
+function Tile () {
 	this.impassable = false;
 	this.oasis = false;
 	this.waterhole = false;
-
 }
 
 function Board (width, heigth) {
@@ -236,7 +245,7 @@ function Board (width, heigth) {
 		var tiles = [];
 		var callback = function (tile, index) {
 			if (typeof tile.waterhole === 'number') {
-				tiles.push([i, index]);
+				tiles.push([i, index, tile.waterhole]);
 			}			
 		}
 		for (var i = 0; i < this.board.length; i++) {
@@ -260,8 +269,14 @@ function Board (width, heigth) {
 }
 
 
+// #########################################################################
+// ##																	  ##
+// ##						DRAWING FUNCTIONS							  ##
+// ##																	  ##
+// #########################################################################
 
-function draw_hexagon (x, y, side, fill) {
+
+function draw_hexagon (x, y, cirumradius, fill) {
 
 	var canvas = document.getElementById('board');
 
@@ -271,15 +286,14 @@ function draw_hexagon (x, y, side, fill) {
 
 		var center_x = x;
     	var center_y = y;
-    	var side_length = side;
 
-    	path.moveTo((Math.cos(Math.PI * 1 / 3) * side_length) + center_x, ((Math.sin(Math.PI * 1 / 3) * side_length) + center_y));
-    	path.lineTo((Math.cos(Math.PI * 2 / 3) * side_length) + center_x, ((Math.sin(Math.PI * 2 / 3) * side_length) + center_y));
-    	path.lineTo((Math.cos(Math.PI * 3 / 3) * side_length) + center_x, ((Math.sin(Math.PI * 3 / 3) * side_length) + center_y));
-    	path.lineTo((Math.cos(Math.PI * 4 / 3) * side_length) + center_x, ((Math.sin(Math.PI * 4 / 3) * side_length) + center_y));
-    	path.lineTo((Math.cos(Math.PI * 5 / 3) * side_length) + center_x, ((Math.sin(Math.PI * 5 / 3) * side_length) + center_y));
-    	path.lineTo((Math.cos(Math.PI * 6 / 3) * side_length) + center_x, ((Math.sin(Math.PI * 6 / 3) * side_length) + center_y));
-    	path.lineTo((Math.cos(Math.PI * 7 / 3) * side_length) + center_x, ((Math.sin(Math.PI * 7 / 3) * side_length) + center_y));
+    	path.moveTo((Math.cos(Math.PI * 1 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 1 / 3) * cirumradius) + center_y));
+    	path.lineTo((Math.cos(Math.PI * 2 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 2 / 3) * cirumradius) + center_y));
+    	path.lineTo((Math.cos(Math.PI * 3 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 3 / 3) * cirumradius) + center_y));
+    	path.lineTo((Math.cos(Math.PI * 4 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 4 / 3) * cirumradius) + center_y));
+    	path.lineTo((Math.cos(Math.PI * 5 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 5 / 3) * cirumradius) + center_y));
+    	path.lineTo((Math.cos(Math.PI * 6 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 6 / 3) * cirumradius) + center_y));
+    	path.lineTo((Math.cos(Math.PI * 7 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 7 / 3) * cirumradius) + center_y));
 
     	ctx.stroke(path);
     	ctx.fillStyle = fill;
@@ -300,14 +314,14 @@ function draw_hexmap (width, height, tilesize, fill) {
 			if (i % 2 > 0) {
 						
 				/*console.log ('uneven!');*/
-				var x = i * tilesize * 2 + tilesize;
+				var x = i * tilesize * 1.75 + tilesize;
 				var y = j * tilesize * 2 + tilesize + tilesize;
 				draw_hexagon(x, y, tilesize, fill);
 
 			} else {
 						
 				/*console.log ('even!');*/
-				var x = i * tilesize * 2 + tilesize;
+				var x = i * tilesize * 1.75 + tilesize;
 				var y = j * tilesize * 2 + tilesize;
 				draw_hexagon(x, y, tilesize, fill);
 
@@ -328,14 +342,14 @@ function draw_oasis (fill) {
 		if (arr[i][0] % 2 > 0) {
 					
 			/*console.log ('uneven!');*/
-			var x = arr[i][0] * BOARD.tilesize * 2 + BOARD.tilesize;
+			var x = arr[i][0] * BOARD.tilesize * 1.75 + BOARD.tilesize;
 			var y = arr[i][1] * BOARD.tilesize * 2 + BOARD.tilesize + BOARD.tilesize;
 			draw_hexagon(x, y, BOARD.tilesize, fill);
 
 		} else {
 					
 			/*console.log ('even!');*/
-			var x = arr[i][0] * BOARD.tilesize * 2 + BOARD.tilesize;
+			var x = arr[i][0] * BOARD.tilesize * 1.75 + BOARD.tilesize;
 			var y = arr[i][1] * BOARD.tilesize * 2 + BOARD.tilesize;
 			draw_hexagon(x, y, BOARD.tilesize, fill);
 
@@ -356,14 +370,14 @@ function draw_impassable (fill) {
 		if (arr[i][0] % 2 > 0) {
 					
 			/*console.log ('uneven!');*/
-			var x = arr[i][0] * BOARD.tilesize * 2 + BOARD.tilesize;
+			var x = arr[i][0] * BOARD.tilesize * 1.75 + BOARD.tilesize;
 			var y = arr[i][1] * BOARD.tilesize * 2 + BOARD.tilesize + BOARD.tilesize;
 			draw_hexagon(x, y, BOARD.tilesize, fill);
 
 		} else {
 					
 			/*console.log ('even!');*/
-			var x = arr[i][0] * BOARD.tilesize * 2 + BOARD.tilesize;
+			var x = arr[i][0] * BOARD.tilesize * 1.75 + BOARD.tilesize;
 			var y = arr[i][1] * BOARD.tilesize * 2 + BOARD.tilesize;
 			draw_hexagon(x, y, BOARD.tilesize, fill);
 
@@ -371,6 +385,40 @@ function draw_impassable (fill) {
 	};
 }
 
-// EVENT HANDLERS
+// function draw_waterhole (fill) {
+
+// 	var arr = BOARD.getImpassable();
+	
+// 	if (typeof arr[0][1] != 'number' || typeof BOARD.tilesize != 'number') {
+// 		throw 'draw_hexmap: invalid argument';
+// 	};
+
+// 	for (var i = 0; i < arr.length; i++) {
+
+// 		if (arr[i][0] % 2 > 0) {
+					
+// 			/*console.log ('uneven!');*/
+// 			var x = arr[i][0] * BOARD.tilesize * 2 + BOARD.tilesize;
+// 			var y = arr[i][1] * BOARD.tilesize * 2 + BOARD.tilesize + BOARD.tilesize;
+// 			draw_hexagon(x, y, BOARD.tilesize, fill);
+
+// 		} else {
+					
+// 			/*console.log ('even!');*/
+// 			var x = arr[i][0] * BOARD.tilesize * 2 + BOARD.tilesize;
+// 			var y = arr[i][1] * BOARD.tilesize * 2 + BOARD.tilesize;
+// 			draw_hexagon(x, y, BOARD.tilesize, fill);
+
+// 		}
+// 	};
+// }
+
+
+// #########################################################################
+// ##																	  ##
+// ##						   	EVENT HANDLERS							  ##
+// ##																	  ##
+// #########################################################################
+
 
 document.body.onload = prepareMap;
