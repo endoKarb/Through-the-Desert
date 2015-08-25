@@ -595,13 +595,19 @@ function updateUI () {
 		player2.style.borderColor = 'red';
 	}
 	
-	for (var i = 0; i < buttons.children.length; i++) {
-		if (GAME.riderWasPlayed(buttons.children[i].value) === true) {
-			buttons.children[i].style.backgroundColor = 'black';
-		} else {
+	if (GAME.currentTurn() < 10) {
+		for (var i = 0; i < buttons.children.length; i++) {
+			if (GAME.riderWasPlayed(buttons.children[i].value) === true) {
+				buttons.children[i].style.backgroundColor = 'black';
+			} else {
+				buttons.children[i].style.backgroundColor = colors[buttons.children[i].value];
+			}
+		}
+	} else {
+		for (var i = 0; i < buttons.children.length; i++) {
 			buttons.children[i].style.backgroundColor = colors[buttons.children[i].value];
 		}
-	};
+	}
 }
 
 function testClick (ev) {
