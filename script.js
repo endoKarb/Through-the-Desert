@@ -95,6 +95,7 @@ var GAME = {
 	'turns': [],
 	'riders_placed': [[],[]],
 	'points': [0,0],
+	'rules': true,
 	'currentTurn': function () {
 		if (this.turns.length < 11) {
 			return this.turns.length;
@@ -659,7 +660,7 @@ function placeCamel (color) {
 		var tile = UI.selectedTile;
 		var act_pl = GAME.activePlayer();
 
-		var legal = camelLegality(color);
+		var legal = (GAME.rules == true) ? camelLegality(color) : true;
 
 		if (legal != false) {
 
@@ -692,7 +693,7 @@ function placeRider (color) {
 		var tile = UI.selectedTile;
 		var act_pl = GAME.activePlayer();
 
-		var legal = riderLegality(color);
+		var legal = (GAME.rules == true) ? riderLegality(color) : true;
 
 		if (legal != false) {
 
