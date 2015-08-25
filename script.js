@@ -92,9 +92,8 @@ var BOARD = {
 
 var GAME = {
 	'board': new Board(18, 13),
-	'turn': new TurnState(0, 1),
-	'players': [new Player(), new Player()],
-	'phase': 'Riders'
+	'turn': 1,
+	'camels_played': 0
 };
 
 var UI = {
@@ -142,11 +141,6 @@ Board.prototype.setWaterholes = function (arr) {
 
 // CREATORS
 
-function Player () {
-	this.name = 'PLAYER';
-	this.riders = ['Mint','Lime','Grape','Lemon','Orange']
-}
-
 function Camel (owner, color, rider) {
 	this.owner = owner;
 	this.color = color;
@@ -158,7 +152,7 @@ function Tile (arr) {
 	this.impassable = false;
 	this.oasis = false;
 	this.waterhole = false;
-	this.camel = null;
+	this.camel = false;
 	this.selected = false;
 	
 	var x = arr[0] * BOARD.tileSize * 1.75 + BOARD.tileSize;
@@ -255,21 +249,28 @@ function Board (width, height) {
 	this.clearBoard = function () {
 		for (var i = 0; i < this.board.length; i++) {
 			for (var j = 0; j < this.board[i].length; j++) {
-				this.board[i][j].camel = null;
+				this.board[i][j].camel = false;
 			};
 		};
 		drawBoardState();
 	}
-}
 
-
-function TurnState (player, turn) {
-
-	this.turn = turn;
-	this.activeplayer = player;
-	this.camels = 0;
-	this.riders = 0;
-	this.lastrider = null;
+	
+	this.colorRider = function (color) {
+		// Checks if current player has already placed a rider of that color
+		var riders = '';
+		for (var i = 0; i < this.board.length; i++) {
+			for (var j = 0; j < this.board[i].length; j++) {
+				var camel = this.board[i][j].camel;
+				if (camel.rider === true && camel.owner === (GAME.turn % 2) && camel.color === color) {
+					// debugger;
+					riders = riders.concat(this.board[i][j].camel.color);
+				}
+			};
+		};
+		
+		return riders;
+	}
 }
 
 // #########################################################################
@@ -306,7 +307,7 @@ function drawBoardState () {
 				drawEmptyHex(x, y, circrad, '#FA8');
 			}
 
-			if (tile.camel != null) {
+			if (tile.camel != false) {
 				var color = '#FFF'
 				switch	(tile.camel.color) {
 					case 'Mint':
@@ -329,12 +330,12 @@ function drawBoardState () {
 				}
 				drawCamel(x, y, circrad, color);
 				if (tile.camel.rider === true) {
-				var color = '#F00';
+				var color = '#FFF';
 				switch	(tile.camel.owner) {
-					case '0':
+					case 0:
 						color = '#F00';
 						break;
-					case '1':
+					case 1:
 						color = '#00F';
 						break;
 					default:
@@ -534,9 +535,6 @@ function PITAGORA (arr, arr2) {
 	return Math.sqrt(Math.pow(x1x2, 2) + Math.pow(y1y2, 2));
 }
 
-
-// UI RELATED
-
 // #########################################################################
 // ##																	  ##
 // ##						   	EVENT HANDLERS							  ##
@@ -571,29 +569,79 @@ function testClick (ev) {
 function placeCamel (ev) {
 
 		var tile = UI.selectedTile;
-		var act_pl = getPlayer;
+		var act_pl = GAME.turn % 2
 		var color = getColor();
 
-		tile.camel = new Camel(act_pl, color, false);
+		var legal = camelLegality();
+		console.log(legal);
 
-		drawBoardState();
+		if (legal === true) {
 
-		console.log('Camel placed!', UI.selectedTile)
+			tile.camel = new Camel(act_pl, color, false);
+			GAME.camels_played++;
+
+			drawBoardState();
+
+			console.log('Camel placed!', UI.selectedTile)
+			
+		} else {
+			
+			console.log('Illegal move')
+		}
+		
 	
 }
 
 function placeRider (ev) {
 
 		var tile = UI.selectedTile;
-		var act_pl = getPlayer();
-		var color = getColor();		
+		var act_pl = GAME.turn % 2;
+		var color = getColor();
 
-		tile.camel = new Camel(act_pl, color, true);
+		var legal = riderLegality();
+		console.log(legal);
 
-		drawBoardState();
+		if (legal != false) {
 
-		console.log('Rider placed!', UI.selectedTile)
+			tile.camel = new Camel(act_pl, color, true);
+			GAME.camels_played++;
+
+			drawBoardState();
+
+			console.log('Rider placed!', UI.selectedTile)
+			
+		} else {
+			
+			console.log('Illegal move')
+		}
 	
+}
+
+function camelLegality () {
+	if (GAME.turn < 11) {
+		return false;
+	} else if (UI.selectedTile.camel != false) {
+		return false
+	} else if (GAME.camels_played === 2) {
+		return false
+	} else if (UI.selectedTile.impassable === true || UI.selectedTile.oasis === true) {
+		return false
+	}
+}
+
+function riderLegality () {
+	
+	if (GAME.turn > 10) {
+		return false;
+	} else if (UI.selectedTile.camel !=	 false) {
+		return false
+	} else if (GAME.camels_played === 1) {
+		return false
+	} else if (UI.selectedTile.impassable === true || UI.selectedTile.oasis === true) {
+		return false
+	} else if (GAME.board.colorRider(getColor()) === getColor()) {
+		return false
+	}
 }
 
 
@@ -602,75 +650,24 @@ function getColor () {
 	return sel.options[sel.selectedIndex].value;
 }
 
-function getPlayer () {
-	var sel = document.getElementById("player");
-	return sel.options[sel.selectedIndex].value;
+// function getPlayer () {
+// 	var sel = document.getElementById("player");
+// 	return sel.options[sel.selectedIndex].value;
+// }
+
+function nextTurn () {
+	GAME.turn++;
+	GAME.camels_played = 0;
+	writeLog();
 }
 
-// function placeRider () {
-
-// 	var player = GAME.turn.activeplayer;
-	
-// 	var clr_select = document.querySelector('div#color').children
-// 	var color;
-
-// 	for (var i = 0; i < clr_select.length; i++) {
-// 		if (clr_select[i].checked === true) {
-// 			color = clr_select[i].value;
-// 		}
-// 	};
-
-// 	var legality = riderCheck();
-
-// 	if (legality === true) {
-
-// 		for (var i = 0; i < GAME.players[player].riders.length; i++) {
-// 			if (GAME.players[player].riders[i] === color) {
-// 				GAME.players[player].riders.splice(i, 1);
-// 				console.log('riders left: ', GAME.players[player].riders.length)
-// 			}
-// 		};
-
-// 		UI.selectedTile.camel = new Camel (player, color, true);
-// 		GAME.turn.lastrider = color;
-// 		GAME.turn.riders++;
-// 	};	
-// }
-
-// function camelCheck () {
-// 	if (GAME.turn.turn = 1 && GAME.turn.camels >= 1) {
-// 		return false
-// 	} else if (GAME.turn.camels >= 2) {
-// 		return false
-// 	} else if (UI.selectedTile.oasis === true) {
-// 		return false
-// 	} else if ()
-// }
-
-// function riderCheck (color) {
-// 	var player = GAME.turn.activeplayer
-// 	if (GAME.turn.riders > 1) {
-// 		return false;
-// 	} if (GAME.turn.lastrider === color && GAME.turn.turn === 2) {
-// 		return false;
-// 	} if (GAME.players[player].riders.length < 1) {
-// 		return false;
-// 	} else {
-// 		return true;
-// 	}
-// }
-
-// function newTurn (ev) {
-// 	var player = (GAME.turn.activeplayer + 1) % 2;
-// 	var turn = GAME.turn.turn + 1;
-// 	GAME.turn = new TurnState(player, turn);
-// 	updateUI();
-// }
-
-
+function writeLog () {
+	var log = document.querySelector('textarea').textContent;
+	var line = 'Turn number: ' + GAME.turn + '\n';
+	document.querySelector('textarea').textContent = log + line;
+}
 
 document.body.onload = prepareBoard;
-
 
 function prepareBoard () {
 	
@@ -686,5 +683,6 @@ function addListeners () {
 	document.querySelector('button').addEventListener('click', placeCamel);
 	document.querySelector('button + button').addEventListener('click', placeRider);
 	document.querySelector('button + button + button').addEventListener('click', GAME.board.clearBoard.bind(GAME.board));
+	document.querySelector('button + button + button + button').addEventListener('click', nextTurn);
 }
 	
