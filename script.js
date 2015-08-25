@@ -198,7 +198,7 @@ function prepareMap () {
 
 
 function Tile (arr) {
-	
+
 	this.impassable = false;
 	this.oasis = false;
 	this.waterhole = false;
@@ -210,7 +210,8 @@ function Tile (arr) {
 	} else {
 		var y = arr[1] * TILESIZE * 2 + TILESIZE;
 	}
-	this.center = [x,y];
+
+	this.center = [x, y, arr[0], arr[1]];
 }
 
 function Board (width, height, tilesize) {
@@ -279,6 +280,17 @@ function Board (width, height, tilesize) {
 		};
 		return tiles;
 	}
+
+	this.getCoorList = function () {
+		var list = [];
+		for (var i = 0; i < this.board.length; i++) {
+			for (var j = 0; j < this.board[i].length; j++) {
+				list.push(this.board[i][j].center);
+			};
+		};
+		return list;
+	}
+
 }
 
 
@@ -427,21 +439,13 @@ function drawNumber (tile) {
 
 }
 
-var PUNTI = [
-	[0,0],
-	[100,12],
-	[55,12],
-	[500,1],
-	[4,990],
-	[43,200]
-]
-
 function closestPoint (arr) {
 	var distances = [];
-	for (var i = 0; i < PUNTI.length; i++) {
-		distances.push(PITAGORA(arr, PUNTI[i]));
+	var coor_list = BOARD.getCoorList();
+	for (var i = 0; i < coor_list.length; i++) {
+		distances.push(PITAGORA(arr, coor_list[i]));
 	};
-	console.log(PUNTI[findSmallest(distances)])
+	console.log([coor_list[findSmallest(distances)][2], coor_list[findSmallest(distances)][3]])
 }
 
 function findSmallest (arr) {
