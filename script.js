@@ -100,7 +100,7 @@ var FLAGS = {
 	'waterhole': false
 };
 
-var TILESIZE = 35;
+var TILESIZE = 26;
 var BOARD = new Board(18, 13);
 
 var UI = {
@@ -211,9 +211,11 @@ function Tile (arr) {
 	this.impassable = false;
 	this.oasis = false;
 	this.waterhole = false;
-	this.piece = false;
+	this.piece = {
+		'exists': false,
+		'color': false,
+	}
 	
-	var coor = arr;
 	var x = arr[0] * TILESIZE * 1.75 + TILESIZE;
 	if (arr[0] % 2 > 0) {
 		var y = arr[1] * TILESIZE * 2 + TILESIZE * 2;
@@ -330,7 +332,7 @@ function drawBoardState () {
 			var y = tile.center[3] * circrad * 2 + circrad * ((i % 2 > 0) ? 2 : 1);
 
 			if (tile.impassable === true) {
-				draw_hexagon(x, y, circrad, '#000');
+				draw_hexagon(x, y, circrad, '#353520');
 			} else if (tile.oasis === true) {
 				draw_hexagon(x, y, circrad, '#9D2');
 			} else if (tile.waterhole != false) {
@@ -343,9 +345,31 @@ function drawBoardState () {
 			if (tile.selected === true) {
 				drawEmptyHex(x, y, circrad, '#FA8');
 			}
-			if (tile.piece === true) {
-				drawPiece(x, y, circrad, '#F22');
+
+			if (tile.piece.exists === true) {
+				var color = '#FFF'
+				switch	(tile.piece.color) {
+					case 'Mint':
+						color = '#BEF6E9';
+						break;
+					case 'Lime':
+						color = '#DBFEA5';
+						break;
+					case 'Grape':
+						color = '#E7CBF7';
+						break;
+					case 'Lemon':
+						color = '#FBFDE3';
+						break;
+					case 'Orange':
+						color = '#F5A886';
+						break;
+					default:
+						break;
+				}
+				drawPiece(x, y, circrad, color);
 			}
+
 		};
 	};
 }
@@ -426,97 +450,6 @@ function drawPiece (x, y, cirumradius, fill) {
 	ctx.fill(path);
 
 }
-
-// function draw_hexmap (width, height, tilesize, fill) {
-
-// 	if (typeof width != 'number' || typeof height != 'number' || typeof tilesize != 'number') {
-// 		throw "draw_hexmap: invalid argument";
-// 	};
-
-// 	for (var i = 0; i < width; i++) {
-
-// 		for (var j = 0; j < height; j++) {
-
-// 			if (i % 2 > 0) {
-
-// 				/*console.log ('uneven!');*/
-// 				var x = i * tilesize * 1.75 + tilesize;
-// 				var y = j * tilesize * 2 + tilesize + tilesize;
-// 				draw_hexagon(x, y, tilesize, fill);
-
-// 			} else {
-
-// 				/*console.log ('even!');*/
-// 				var x = i * tilesize * 1.75 + tilesize;
-// 				var y = j * tilesize * 2 + tilesize;
-// 				draw_hexagon(x, y, tilesize, fill);
-
-// 			}
-// 		};
-// 	};
-// }
-
-// function draw_oasis (fill) {
-
-// 	var arr = BOARD.getOasis();
-
-// 	if (typeof arr[0][1] != 'number' || typeof BOARD.tilesize != 'number') {
-// 		throw 'draw_hexmap: invalid argument';
-// 	};
-
-// 	for (var i = 0; i < arr.length; i++) {
-
-// 		if (arr[i][0] % 2 > 0) {
-
-// 			/*console.log ('uneven!');*/
-// 			var x = arr[i][0] * BOARD.tilesize * 1.75 + BOARD.tilesize;
-// 			var y = arr[i][1] * BOARD.tilesize * 2 + BOARD.tilesize + BOARD.tilesize;
-// 			draw_hexagon(x, y, BOARD.tilesize, fill);
-
-// 		} else {
-
-// 			/*console.log ('even!');*/
-// 			var x = arr[i][0] * BOARD.tilesize * 1.75 + BOARD.tilesize;
-// 			var y = arr[i][1] * BOARD.tilesize * 2 + BOARD.tilesize;
-// 			draw_hexagon(x, y, BOARD.tilesize, fill);
-
-// 		}
-// 	};
-// }
-
-// function draw_impassable (fill) {
-
-// 	var arr = BOARD.getImpassable();
-
-// 	if (typeof arr[0][1] != 'number' || typeof BOARD.tilesize != 'number') {
-// 		throw 'draw_hexmap: invalid argument';
-// 	};
-
-// 	for (var i = 0; i < arr.length; i++) {
-
-// 		if (arr[i][0] % 2 > 0) {
-
-// 			/*console.log ('uneven!');*/
-// 			var x = arr[i][0] * BOARD.tilesize * 1.75 + BOARD.tilesize;
-// 			var y = arr[i][1] * BOARD.tilesize * 2 + BOARD.tilesize + BOARD.tilesize;
-// 			draw_hexagon(x, y, BOARD.tilesize, fill);
-
-// 		} else {
-
-// 			/*console.log ('even!');*/
-// 			var x = arr[i][0] * BOARD.tilesize * 1.75 + BOARD.tilesize;
-// 			var y = arr[i][1] * BOARD.tilesize * 2 + BOARD.tilesize;
-// 			draw_hexagon(x, y, BOARD.tilesize, fill);
-
-// 		}
-// 	};
-// }
-
-// function draw_waterholes () {
-// 	var holes = BOARD.getWaterholes();
-// 	// console.log(holes);
-// 	holes.map(drawNumber);
-// }
 
 function drawNumber (tile) {
 	var x = tile.center[2]
@@ -632,15 +565,36 @@ function testClick (ev) {
 }
 
 function playPiece (ev) {
-	console.log('Piece Played!');
-	UI.selectedTile.piece = true;
-	drawBoardState();
+	
+	var buttons = document.querySelector('div#pieceColor').children;
+	var color = '';
+
+	for (var i = 0; i < buttons.length; i++) {
+		if (buttons[i].checked === true) {
+			color = buttons[i].value;
+		};
+	};
+
+	if (typeof UI.selectedTile != 'undefined' && UI.selectedTile.piece.exists === false) {
+
+		UI.selectedTile.piece.exists = true;
+		UI.selectedTile.piece.color = color;
+		drawBoardState();
+		console.log('Piece Played!');
+
+	}
 }
 
 function removePiece (ev) {
-	console.log('Piece Removed');
-	UI.selectedTile.piece = false;
-	drawBoardState();
+
+	if (typeof UI.selectedTile != 'undefined' && UI.selectedTile.piece.exists === true) {
+
+		UI.selectedTile.piece.exists = false;
+		UI.selectedTile.piece.color = false;
+		drawBoardState();
+		console.log('Piece Removed');
+
+	}
 }
 
 document.body.onload = prepareBoard;
