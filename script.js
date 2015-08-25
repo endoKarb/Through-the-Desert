@@ -100,7 +100,7 @@ var FLAGS = {
 	'waterhole': false
 };
 
-
+var TILESIZE = 35;
 var BOARD = new Board(18, 13);
 
 
@@ -197,24 +197,35 @@ function prepareMap () {
 
 
 
-function Tile () {
+function Tile (arr) {
+	
 	this.impassable = false;
 	this.oasis = false;
 	this.waterhole = false;
+	
+	var coor = arr;
+	var x = arr[0] * TILESIZE * 1.75 + TILESIZE;
+	if (arr[0] % 2 > 0) {
+		var y = arr[1] * TILESIZE * 2 + TILESIZE * 2;
+	} else {
+		var y = arr[1] * TILESIZE * 2 + TILESIZE;
+	}
+	this.center = [x,y];
 }
 
-function Board (width, height) {
+function Board (width, height, tilesize) {
 	// Transform an array of rows in a Board object made of list of Tile objects
 
 	this.board = [];
 	this.width = width;
 	this.height = height;
-	this.tilesize = 35;
+	this.tilesize = TILESIZE;
 
 	for (var i = 0; i < width; i++) {
 		var column = [];
 		for (var j = 0; j < height; j++) {
-			column.push(new Tile);
+			var coor = [i,j];
+			column.push(new Tile(coor));
 		};
 		this.board.push(column);
 		console.log(this.board);
