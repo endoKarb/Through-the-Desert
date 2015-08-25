@@ -571,7 +571,7 @@ function testClick (ev) {
 function placeCamel (ev) {
 
 		var tile = UI.selectedTile;
-		var act_pl = GAME.turn.activeplayer;
+		var act_pl = getPlayer;
 		var color = getColor();
 
 		tile.camel = new Camel(act_pl, color, false);
@@ -585,22 +585,25 @@ function placeCamel (ev) {
 function placeRider (ev) {
 
 		var tile = UI.selectedTile;
-		var act_pl = GAME.turn.activeplayer;
-		var color = getColor();
-
-		
+		var act_pl = getPlayer();
+		var color = getColor();		
 
 		tile.camel = new Camel(act_pl, color, true);
 
 		drawBoardState();
 
-		console.log('Camel placed!', UI.selectedTile)
+		console.log('Rider placed!', UI.selectedTile)
 	
 }
 
 
 function getColor () {
 	var sel = document.getElementById("color");
+	return sel.options[sel.selectedIndex].value;
+}
+
+function getPlayer () {
+	var sel = document.getElementById("player");
 	return sel.options[sel.selectedIndex].value;
 }
 
