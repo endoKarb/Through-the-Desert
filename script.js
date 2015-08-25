@@ -119,7 +119,7 @@ function setImpassable () {
 
 			for (var i = 0; i < IMPASSABLE_TILES.length; i++) {
 				BOARD.getTile(IMPASSABLE_TILES[i]).impassable = true;
-				console.log(BOARD.getTile(IMPASSABLE_TILES[i]));
+				// console.log(BOARD.getTile(IMPASSABLE_TILES[i]));
 			};
 
 			FLAGS.impassable = true;
@@ -144,7 +144,7 @@ function setOasis () {
 
 			for (var i = 0; i < loc.length; i++) {
 				BOARD.getTile(loc[i]).oasis = true;
-				console.log(BOARD.getTile(loc[i]));
+				// console.log(BOARD.getTile(loc[i]));
 
 			};
 			// console.log(splice);
@@ -186,13 +186,14 @@ function setWaterholes (arr) {
 }
 
 function prepareMap () {
-	BOARD.printBoard();
+	// BOARD.printBoard();
 	setImpassable();
 	var splice = setOasis()[0];
 	setWaterholes(splice);
-	draw_impassable('#333');
-	draw_oasis('#4F4');
-	draw_waterholes();
+	drawBoardState();
+	// draw_impassable('#333');
+	// draw_oasis('#4F4');
+	// draw_waterholes();
 }
 
 
@@ -212,6 +213,8 @@ function Tile (arr) {
 	}
 
 	this.center = [x, y, arr[0], arr[1]];
+
+	this.selected = false;
 }
 
 function Board (width, height, tilesize) {
@@ -229,11 +232,11 @@ function Board (width, height, tilesize) {
 			column.push(new Tile(coor));
 		};
 		this.board.push(column);
-		console.log(this.board);
+		// console.log(this.board);
 	};
 
 	this.getTile = function (arr) {
-		console.log(arr, arr[0], arr[1]);
+		// console.log(arr, arr[0], arr[1]);
 		// Takes an array of coordinates and returns the corresponding Tile object
 		return this.board[arr[0]][arr[1]];
 	}
@@ -291,6 +294,13 @@ function Board (width, height, tilesize) {
 		return list;
 	}
 
+	this.resetClicked = function () {
+		for (var i = 0; i < this.board.length; i++) {
+			for (var j = 0; j < this.board[i].length; j++) {
+				this.board[i][j].selected = false;
+			};
+		};
+	}
 }
 
 
@@ -300,6 +310,29 @@ function Board (width, height, tilesize) {
 // ##																	  ##
 // #########################################################################
 
+function drawBoardState () {
+
+	for (var i = 0; i < BOARD.board.length; i++) {
+		for (var j = 0; j < BOARD.board[i].length; j++) {
+
+			var tile = BOARD.board[i][j]
+			var circrad = BOARD.tilesize
+			var x = tile.center[2] * circrad * 1.75 + circrad;
+			var y = tile.center[3] * circrad * 2 + circrad * ((i % 2 > 0) ? 2 : 1);
+
+			if (tile.impassable === true) {
+				draw_hexagon(x, y, circrad, '#000');
+			} else if (tile.oasis === true) {
+				draw_hexagon(x, y, circrad, '#9D2');
+			} else if (tile.waterhole != false) {
+				draw_hexagon(x, y, circrad, '#36D');
+				drawNumber(tile);
+			} else {
+				draw_hexagon(x, y, circrad, '#AA8');
+			}
+		};
+	};
+}
 
 function draw_hexagon (x, y, cirumradius, fill) {
 
@@ -413,38 +446,41 @@ function draw_impassable (fill) {
 
 function draw_waterholes () {
 	var holes = BOARD.getWaterholes();
-	console.log(holes);
+	// console.log(holes);
 	holes.map(drawNumber);
 }
 
 function drawNumber (tile) {
+	var x = tile.center[2]
+	var y = tile.center[3]
+
 
 	var circumradius = BOARD.tilesize * 0.6;
 
 	var canvas = document.getElementById('board');
     var ctx = canvas.getContext('2d');
 
-	var center_x = tile[0] * 1.75 * BOARD.tilesize + BOARD.tilesize;
-	var center_y = tile[1] * 2 * BOARD.tilesize + BOARD.tilesize * ((tile[0] % 2 > 0) ? 2 : 1);
+	var center_x = x * 1.75 * BOARD.tilesize + BOARD.tilesize;
+	var center_y = y * 2 * BOARD.tilesize + BOARD.tilesize * ((x % 2 > 0) ? 2 : 1);
 
 	var origin_x = (Math.cos(Math.PI * 6 / 8) * circumradius) + center_x;
 	var origin_y = (Math.sin(Math.PI * 3 / 8) * circumradius) + center_y;
 
 	var end_x = Math.abs(origin_x - ((Math.cos(Math.PI * 1 / 3) * circumradius) + center_x));
 
-	ctx.fillStyle = '#46A';
+	ctx.fillStyle = '#FFF';
 
 	ctx.font = end_x * 2 + 'px Helvetica, sans-serif';
-	ctx.fillText('' + tile[2],  origin_x, origin_y);
+	ctx.fillText('' + tile.waterhole,  origin_x, origin_y);
 
 }
 
 function isTile (arr, arr1) {
 	//Tells if the first point belongs to the tile centered in the second point
 	if (PITAGORA(arr, arr1) <= BOARD.tilesize) {
-		return 'isTile!';
+		return true;
 	} else {
-		return 'isNotTile!';
+		return false;
 	}
 }
 
@@ -457,7 +493,8 @@ function closestTile (arr) {
 	};
 	var closest = coor_list[findSmallest(distances)];
 	var is_tile = isTile(arr, [closest[0], closest[1]]);
-	console.log([closest[2], closest[3], is_tile]);
+	// console.log([closest[2], closest[3], is_tile]);
+	return ([closest[2], closest[3], is_tile]);
 }
 
 function findSmallest (arr) {
@@ -496,8 +533,15 @@ function PITAGORA (arr, arr2) {
 
 function testClick (ev) {
 	console.log('clickCoor', ev.layerX, ev.layerY);
-	var cor = [ev.layerX, ev.layerY];
-	closestTile(cor);
+	var coor = [ev.layerX, ev.layerY];
+	var tile = closestTile(coor);
+	if (tile[2] === true) {
+		BOARD.resetClicked();
+		BOARD.board[tile[0]][tile[1]].selected = true;
+		console.log('Tile', BOARD.board[tile[0]][tile[1]].center[2], BOARD.board[tile[0]][tile[1]].center[3], 'selected.');
+	} else {
+		console.log("Not a tile");
+	}
 	// return [ev.layerX, ev.layerY];
 }
 document.querySelector('canvas').addEventListener('click', testClick);
