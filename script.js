@@ -93,7 +93,7 @@ var BOARD = {
 var GAME = {
 	'board': new Board(18, 13),
 	'turns': [],
-	'camels_played': 0,
+	'riders_placed': [[],[]],
 	'currentTurn': function () {
 		if (this.turns.length < 11) {
 			return this.turns.length;
@@ -103,6 +103,15 @@ var GAME = {
 	},
 	'activePlayer': function () {
 		return this.currentTurn() % 2;
+	},
+	'riderWasPlayed': function (color) {
+		var ply = this.activePlayer();
+		for (var i = 0; i < this.riders_placed[ply].length; i++) {
+			if (this.riders_placed[ply][i] === color) {
+				console.log('was played');
+				return true;
+			}
+		};
 	}
 };
 
@@ -565,8 +574,19 @@ function PITAGORA (arr, arr2) {
 
 
 function updateUI () {
+
+	debugger;
+	var colors = {
+		'Mint': '#BEF6E9',
+		'Lime': '#DBFEA5',
+		'Grape': '#E7CBF7',
+		'Lemon': '#FBFDE3',
+		'Orange': '#F5A886'
+	};
 	var player1 = document.querySelector('div .white');
 	var player2 = document.querySelector('div .black');
+	var buttons = document.querySelector('div#color');
+
 	if (GAME.activePlayer() === 0) {
 		player1.style.borderColor = 'red';
 		player2.style.borderColor = 'white';
@@ -574,6 +594,14 @@ function updateUI () {
 		player1.style.borderColor = 'white';
 		player2.style.borderColor = 'red';
 	}
+	
+	for (var i = 0; i < buttons.children.length; i++) {
+		if (GAME.riderWasPlayed(buttons.children[i].value) === true) {
+			buttons.children[i].style.backgroundColor = 'black';
+		} else {
+			buttons.children[i].style.backgroundColor = colors[buttons.children[i].value];
+		}
+	};
 }
 
 function testClick (ev) {
@@ -655,6 +683,7 @@ function placeRider (color) {
 			tile.camel = new Camel(act_pl, color, true);
 			STASH[color]--
 			GAME.turns.push(new Turn(act_pl, color, coor));
+			GAME.riders_placed[act_pl].push(color);
 
 			drawBoardState();
 
