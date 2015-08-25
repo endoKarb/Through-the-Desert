@@ -439,16 +439,29 @@ function drawNumber (tile) {
 
 }
 
-function closestPoint (arr) {
+function isTile (arr, arr1) {
+	//Tells if the first point belongs to the tile centered in the second point
+	if (PITAGORA(arr, arr1) <= BOARD.tilesize) {
+		return 'isTile!';
+	} else {
+		return 'isNotTile!';
+	}
+}
+
+function closestTile (arr) {
+	//Finds the closest tile on the board given an array containing two coordinates. Returns their board coordinates
 	var distances = [];
 	var coor_list = BOARD.getCoorList();
 	for (var i = 0; i < coor_list.length; i++) {
 		distances.push(PITAGORA(arr, coor_list[i]));
 	};
-	console.log([coor_list[findSmallest(distances)][2], coor_list[findSmallest(distances)][3]])
+	var closest = coor_list[findSmallest(distances)];
+	var is_tile = isTile(arr, [closest[0], closest[1]]);
+	console.log([closest[2], closest[3], is_tile]);
 }
 
 function findSmallest (arr) {
+	// Finds the smalles element in an array and returns his index
 	var list = arr;
 	var gindex = 0;
 	var callback = function (acc, current, index) {
@@ -464,6 +477,7 @@ function findSmallest (arr) {
 }
 
 function PITAGORA (arr, arr2) {
+	// Calculates distances between two points, taking two array with their coordinates as argument
 	var point1 = [arr[0], arr[1]];
 	var point2 = [arr2[0], arr2[1]];
 	var x1x2 = Math.abs(point1[0] - point2[0]);
@@ -483,7 +497,7 @@ function PITAGORA (arr, arr2) {
 function testClick (ev) {
 	console.log('clickCoor', ev.layerX, ev.layerY);
 	var cor = [ev.layerX, ev.layerY];
-	closestPoint(cor);
+	closestTile(cor);
 	// return [ev.layerX, ev.layerY];
 }
 document.querySelector('canvas').addEventListener('click', testClick);
