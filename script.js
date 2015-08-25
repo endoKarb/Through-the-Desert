@@ -97,7 +97,8 @@ var WATERHOLES_TILES = [
 var FLAGS = {
 	'impassable': false,
 	'oasis': false,
-	'waterhole': false
+	'waterhole': false,
+	'LeadersPlaced': []
 };
 
 var TILESIZE = 26;
@@ -198,6 +199,7 @@ function prepareBoard () {
 
 	document.querySelector('button').addEventListener('click', playPiece);
 	document.querySelector('button + button').addEventListener('click', removePiece);
+	document.querySelector('button + button + button').addEventListener('click', placeLeader);
 
 	// draw_impassable('#333');
 	// draw_oasis('#4F4');
@@ -284,17 +286,17 @@ function Board (width, height) {
 					[x+1,y],
 					[x+1,y+1],
 				];
-				console.log('duh');
+				console.log('uneven');
 				break;
 		}
-		
+
 		for (var i = 0; i < tiles_to_find.length; i++) {
 			if (tiles_to_find[i][0] < 0 || tiles_to_find[i][0] >= this.width || tiles_to_find[i][1] < 0 || tiles_to_find[i][1] >= this.height) {
 			} else {
 				adj_tiles.push(BOARD.board[tiles_to_find[i][0]][tiles_to_find[i][1]])
 			}
-		console.log(adj_tiles);
 		};
+	return adj_tiles;
 	}
 
 	this.getImpassable = function () {
@@ -620,8 +622,51 @@ function playPiece (ev) {
 		};
 	};
 
-	if (typeof UI.selectedTile != 'undefined' && UI.selectedTile.piece.exists === false) {
+	var x = UI.selectedTile.center[2];
+	var y = UI.selectedTile.center[3];
+	var adjacent = BOARD.getAdjacent([x,y]);
+	console.log(x, y, adjacent);
+	var legal = false;
+	
+	
+	for (var j = 0; j < adjacent.length; j++) {		
+		if (adjacent[j].piece.color === color) {
+			legal = true;
+		};
+	};
 
+	if (typeof UI.selectedTile != 'undefined' && UI.selectedTile.piece.exists === false && legal === true) {
+
+		UI.selectedTile.piece.exists = true;
+		UI.selectedTile.piece.color = color;
+		drawBoardState();
+		console.log('Piece Played!');
+
+	}
+}
+
+function placeLeader (ev) {
+	
+	var buttons = document.querySelector('div#pieceColor').children;
+	var color = '';
+
+	for (var i = 0; i < buttons.length; i++) {
+		if (buttons[i].checked === true) {
+			color = buttons[i].value;
+		};
+	};
+
+	var legal = true;
+
+	for (var i = 0; i < FLAGS.LeadersPlaced.length; i++) {
+		if (FLAGS.LeadersPlaced[i] === color) {
+			var legal = false
+		};
+	};
+
+	if (typeof UI.selectedTile != 'undefined' && UI.selectedTile.piece.exists === false && legal === true && color.length > 2) {
+
+		FLAGS.LeadersPlaced.push(color);
 		UI.selectedTile.piece.exists = true;
 		UI.selectedTile.piece.color = color;
 		drawBoardState();
