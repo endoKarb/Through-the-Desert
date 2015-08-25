@@ -564,6 +564,18 @@ function PITAGORA (arr, arr2) {
 // #########################################################################
 
 
+function updateUI () {
+	var player1 = document.querySelector('div .white');
+	var player2 = document.querySelector('div .black');
+	if (GAME.activePlayer() === 0) {
+		player1.style.borderColor = 'red';
+		player2.style.borderColor = 'white';
+	} else {
+		player1.style.borderColor = 'white';
+		player2.style.borderColor = 'red';
+	}
+}
+
 function testClick (ev) {
 
 	console.log('clickCoor', ev.layerX, ev.layerY);
@@ -599,6 +611,7 @@ function play (color) {
 	} else {
 		placeRider(color);
 	}
+	updateUI();
 }
 
 function placeCamel (color) {
@@ -757,6 +770,7 @@ function prepareBoard () {
 	var splice = GAME.board.setOasis()[0];
 	GAME.board.setWaterholes(splice);
 	drawBoardState();
+	updateUI();
 }
 
 function buttonHandler (ev) {
