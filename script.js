@@ -92,8 +92,18 @@ var BOARD = {
 
 var GAME = {
 	'board': new Board(18, 13),
-	'turn': 1,
-	'camels_played': 0
+	'turns': [],
+	'camels_played': 0,
+	'currentTurn': function () {
+		if (this.turns.length < 11) {
+			return this.turns.length;
+		} else {
+			return Math.floor((this.turns.length - 10) / 2) + 10;
+		}
+	},
+	'activePlayer': function () {
+		return this.currentTurn() % 2;
+	}
 };
 
 var STASH = {
@@ -156,6 +166,12 @@ Board.prototype.setWaterholes = function (arr) {
 
 // CREATORS
 
+function Turn (player, color, coor) {
+	this.player = player;
+	this.move = [coor[0], coor[1]];
+	this.color = color;
+}
+
 function Camel (owner, color, rider) {
 	this.owner = owner;
 	this.color = color;
@@ -177,7 +193,8 @@ function Tile (arr) {
 		var y = arr[1] * BOARD.tileSize * 2 + BOARD.tileSize;
 	}
 
-	this.center = [x, y, arr[0], arr[1]];
+	this.center = [x, y];
+	this.coor = [arr[0], arr[1]]
 }
 
 function Board (width, height) {
@@ -247,7 +264,7 @@ function Board (width, height) {
 		var list = [];
 		for (var i = 0; i < this.board.length; i++) {
 			for (var j = 0; j < this.board[i].length; j++) {
-				list.push(this.board[i][j].center);
+				list.push([this.board[i][j].center, this.board[i][j].coor]);
 			};
 		};
 		return list;
@@ -277,7 +294,7 @@ function Board (width, height) {
 		for (var i = 0; i < this.board.length; i++) {
 			for (var j = 0; j < this.board[i].length; j++) {
 				var camel = this.board[i][j].camel;
-				if (camel.rider === true && camel.owner === (GAME.turn % 2) && camel.color === color) {
+				if (camel.rider === true && camel.owner === (GAME.activePlayer()) && camel.color === color) {
 					// debugger;
 					riders = riders.concat(this.board[i][j].camel.color);
 				}
@@ -304,17 +321,10 @@ function drawBoardState () {
 			
 			var tile = GAME.board.board[i][j]
 			var circrad = BOARD.tileSize
-			var x = tile.center[2] * circrad * 1.75 + circrad;
-			var y = tile.center[3] * circrad * 2 + circrad * ((i % 2 > 0) ? 2 : 1);
+			var x = tile.coor[0] * circrad * 1.75 + circrad;
+			var y = tile.coor[1] * circrad * 2 + circrad * ((i % 2 > 0) ? 2 : 1);
 
-			if (tile.impassable === true) {
-				draw_hexagon(x, y, circrad, '#353520');
-			} else if (tile.oasis === true) {
-				draw_hexagon(x, y, circrad, '#9D2');
-			} else if (tile.waterhole != false) {
-				draw_hexagon(x, y, circrad, '#36D');
-				drawNumber(tile);
-			} else if (tile.camel != false) {
+			 if (tile.camel != false) {
 				var color = '#FFF'
 				switch	(tile.camel.color) {
 					case 'Mint':
@@ -350,6 +360,13 @@ function drawBoardState () {
 				}
 				drawRider(x, y, circrad, color);
 				}
+			} else if (tile.impassable === true) {
+				draw_hexagon(x, y, circrad, '#353520');
+			} else if (tile.waterhole != false) {
+				draw_hexagon(x, y, circrad, '#36D');
+				drawNumber(tile);
+			} else if (tile.oasis === true) {
+				draw_hexagon(x, y, circrad, '#9D2');
 			} else {
 				draw_hexagon(x, y, circrad, '#AA8');
 			}
@@ -460,8 +477,8 @@ function drawRider (x, y, cirumradius, fill) {
 }
 
 function drawNumber (tile) {
-	var x = tile.center[2]
-	var y = tile.center[3]
+	var x = tile.coor[0]
+	var y = tile.coor[1]
 
 	var circumradius = BOARD.tileSize * 0.6;
 
@@ -506,12 +523,12 @@ function closestTile (arr) {
 	var distances = [];
 	var coor_list = GAME.board.getCoorList();
 	for (var i = 0; i < coor_list.length; i++) {
-		distances.push(PITAGORA(arr, coor_list[i]));
+		distances.push(PITAGORA(arr, coor_list[i][0]));
 	};
 	var closest = coor_list[findSmallest(distances)];
-	var is_tile = isTile(arr, [closest[0], closest[1]]);
+	var is_tile = isTile(arr, [closest[0][0], closest[0][1]]);
 	// console.log([closest[2], closest[3], is_tile]);
-	return ([closest[2], closest[3], is_tile]);
+	return ([closest[1][0], closest[1][1], is_tile]);
 }
 
 function findSmallest (arr) {
@@ -553,7 +570,6 @@ function testClick (ev) {
 
 	var coordinates = [ev.layerX, ev.layerY];
 	var tile = closestTile(coordinates);
-
 	if (tile[2] === true) {
 
 		GAME.board.resetClicked();
@@ -561,12 +577,12 @@ function testClick (ev) {
 		GAME.board.board[tile[0]][tile[1]].selected = true;
 		UI.selectedTile = GAME.board.board[tile[0]][tile[1]];
 
-		console.log('Tile', GAME.board.board[tile[0]][tile[1]].center[2], GAME.board.board[tile[0]][tile[1]].center[3], 'selected.');
+		console.log('Tile', GAME.board.board[tile[0]][tile[1]].coor[0], GAME.board.board[tile[0]][tile[1]].coor[1], 'selected.');
 
 		drawBoardState();
 
 	} else {
-		
+
 		GAME.board.resetClicked();
 		UI.selectedTile = null;
 		console.log("Not a tile");
@@ -577,28 +593,28 @@ function testClick (ev) {
 
 
 
-function play () {
-	if (GAME.turn > 10) {
-		placeCamel()
+function play (color) {
+	if (GAME.currentTurn() >= 10) {
+		placeCamel(color);
 	} else {
-		placeRider()
+		placeRider(color);
 	}
 }
 
-function placeCamel () {
+function placeCamel (color) {
 
 		var tile = UI.selectedTile;
-		var act_pl = GAME.turn % 2
-		var color = getColor();
+		var act_pl = GAME.activePlayer();
 
-		var legal = camelLegality();
-		console.log(legal);
+		var legal = true
 
 		if (legal === true) {
 
+			var coor = [UI.selectedTile.coor[0], UI.selectedTile.coor[1]]
 			tile.camel = new Camel(act_pl, color, false);
+			console.log(tile.camel);
 			STASH[color]--
-			GAME.camels_played++;
+			GAME.turns.push(new Turn(act_pl, color, coor));
 
 			drawBoardState();
 
@@ -613,20 +629,19 @@ function placeCamel () {
 	
 }
 
-function placeRider () {
-
+function placeRider (color) {
+		
 		var tile = UI.selectedTile;
-		var act_pl = GAME.turn % 2;
-		var color = getColor();
+		var act_pl = GAME.activePlayer();
 
-		var legal = riderLegality();
-		console.log(legal);
+		var legal = riderLegality(color);
 
 		if (legal != false) {
 
+			var coor = [UI.selectedTile.coor[0], UI.selectedTile.coor[1]]
 			tile.camel = new Camel(act_pl, color, true);
 			STASH[color]--
-			GAME.camels_played++;
+			GAME.turns.push(new Turn(act_pl, color, coor));
 
 			drawBoardState();
 
@@ -640,57 +655,69 @@ function placeRider () {
 	
 }
 
-function camelLegality () {
-	if (GAME.turn < 11) {
-		return false;
-	} else if (UI.selectedTile.camel != false) {
-		return false
-	} else if (GAME.camels_played === 2) {
-		return false
-	} else if (UI.selectedTile.impassable === true || UI.selectedTile.oasis === true) {
-		return false
-	} else if (STASH[getColor()] === 0) {
-		return false
-	}
-}
+// function camelLegality () {
+// 	if (GAME.turn < 11) {
+// 		return false;
+// 	} else if (UI.selectedTile.camel != false) {
+// 		return false
+// 	} else if (GAME.camels_played === 2) {
+// 		return false
+// 	} else if (UI.selectedTile.impassable === true || UI.selectedTile.oasis === true) {
+// 		return false
+// 	} else if (STASH[getColor()] === 0) {
+// 		return false
+// 	}
+// }
 
-function riderLegality () {
+function riderLegality (color) {
 	
+	var adj_til = GAME.board.getAdjacent(UI.selectedTile.coor);
+
 	if (GAME.turn > 10) {
-		console.log('no riders after turn 10');
+		console.log('No riders after turn 10');
 		return false;
 	} else if (UI.selectedTile.camel !=	 false) {
-		console.log('tile already occupied');
-		return false
-	} else if (GAME.camels_played === 1) {
-		console.log('rider already placed this turn');
+		console.log('Tile already occupied');
 		return false
 	} else if (UI.selectedTile.impassable === true || UI.selectedTile.oasis === true) {
-		console.log('rider already placed this turn');
+		console.log('Can\'t play there');
 		return false
-	} else if (GAME.board.colorRider(getColor()) === getColor()) {
+	} else if (GAME.board.colorRider(color) === color) {
+		console.log('One rider per color');
 		return false
-	} else if (STASH[getColor()] === 0) {
+	} else if (colorExists(color, adj_til) === true) {
+		console.log('Can\'t play adjacent same color');
+		return false
+	} else if (oasisExists(adj_til) === true) {
+		console.log('Can\'t play near oasis');
+		return false
+	} else if (oasisExists(adj_til) === true) {
+		console.log('Can\'t play near oasis');
+		return false
+	} else if (GAME.currentTurn() === 1 && GAME.turns[0].color === color) {
+		console.log('Can\'t play same color as opponent first turn');
 		return false
 	}
 }
 
-
-function getColor () {
-	var sel = document.getElementById("color");
-	return sel.options[sel.selectedIndex].value;
+function colorExists (color, tile_arr) {
+	//Tells you if a camel of "color" exists in the tiles specified in the "tile_arr"
+	for (var i = 0; i < tile_arr.length; i++) {
+		if (tile_arr[i].camel.color === color) {
+			return true;
+		}
+	};
+	return false;
 }
 
-function nextTurn () {
-	if (GAME.camels_played === 0) {
-
-	} else if (GAME.camels_played === 1 && GAME.turn > 10) {
-
-	} else {
-		GAME.turn++;
-		GAME.camels_played = 0;
-		writeLog();
-	}
+function oasisExists (tile_arr) {
+	//Tells you if an oasis in the tiles specified in the "tile_arr"
+	for (var i = 0; i < tile_arr.length; i++) {
+		if (tile_arr[i].oasis === true) {
+			return true;
+		}
+	};
+	return false;
 }
 
 document.body.onload = prepareBoard;
@@ -705,16 +732,12 @@ function prepareBoard () {
 }
 
 function buttonHandler (ev) {
-	if (ev.target.type == 'submit' && UI.returnSelected != null) {
-		console.log(ev.target.value);
+	if (ev.target.type == 'submit' && UI.returnSelected() != null) {
+		play(ev.target.value);
 	}
 }
 
 function addListeners () {
 	document.querySelector('canvas').addEventListener('click', testClick);
 	document.querySelector('div#color').addEventListener('click', buttonHandler);
-	// document.querySelector('div#colors button + button').addEventListener('click', placeRider);
-	// document.querySelector('div#colors button + button + button').addEventListener('click', GAME.board.clearBoard.bind(GAME.board));
-	// document.querySelector('div#colors button + button + button + button').addEventListener('click', nextTurn);
-	// document.querySelector('input[name=inputbox]').addEventListener('keydown', textHandler);
 }
