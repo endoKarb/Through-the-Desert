@@ -5,29 +5,48 @@
 	<style>
 		canvas {
 			transform: translateZ(0);
+			float:left
+		}
+		textarea {
+			resize: none;
+			float: left;
+			height: 700px;
+			width: 300px;
 		}
 	</style>
 </head>
 <body>
 	<div>Through the Desert</div>
-	<canvas id="board" height="800px" width="1400px"></canvas>
+	<div>
+		<canvas id="board" height="800px" width="1000px"></canvas>
+		<textarea readonly></textarea>
+	</div>	
 	<script src="script.js"></script>
 	<div>
 		<button>Place Camel</button>
 		<button>Reset Board</button>
 		<button>New Turn</button>
 	</div>
-	<div id="stats">
+<!-- 	<div id="stats">
 		Active Player: <span name="player"></span> 
 		Current Turn: <span name="turn"></span> 
 		Camels Left: <span name="camels"></span>
-	</div>
-<!-- 	<div id="pieceColor">
-		<input type="radio" name="color" value="Mint">Mint</button>
+	</div> -->
+<!-- 	<div id="color">
+		<input type="radio" name="color" value="Mint" checked>Mint</button>
 		<input type="radio" name="color" value="Lime">Lime</button>
 		<input type="radio" name="color" value="Grape">Grape</button>
 		<input type="radio" name="color" value="Lemon">Lemon</button>
 		<input type="radio" name="color" value="Orange">Orange</button>
+	</div> -->
+<!-- 	<div id="color">
+		<select>
+			<option name="color" value="Mint" checked>Mint</button>
+			<option name="color" value="Lime">Lime</button>
+			<option name="color" value="Grape">Grape</button>
+			<option name="color" value="Lemon">Lemon</button>
+			<option name="color" value="Orange">Orange</button>
+		</select>
 	</div> -->
 </body>
 

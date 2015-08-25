@@ -92,7 +92,9 @@ var BOARD = {
 
 var GAME = {
 	'board': new Board(18, 13),
-	'turn': new TurnState(0, 1)
+	'turn': new TurnState(0, 1),
+	'players': [new Player(), new Player()],
+	'phase': 'Riders'
 };
 
 var UI = {
@@ -106,20 +108,6 @@ var UI = {
 // ##						   	GAME.board GENERATION						  ##
 // ##																	  ##
 // #########################################################################
-
-function prepareBoard () {
-
-	updateUI();
-	GAME.board.setImpassable();
-	var splice = GAME.board.setOasis()[0];
-	GAME.board.setWaterholes(splice);
-	drawBoardState();
-
-	document.querySelector('button').addEventListener('click', placeCamel);
-	document.querySelector('button + button').addEventListener('click', GAME.board.clearBoard.bind(GAME.board));
-	document.querySelector('button + button + button').addEventListener('click', newTurn);
-
-}
 
 Board.prototype.setImpassable = function () {
 	for (var i = 0; i < BOARD.impassableTiles.length; i++) {
@@ -154,10 +142,15 @@ Board.prototype.setWaterholes = function (arr) {
 
 // CREATORS
 
-function Camel (owner, color) {
+function Player () {
+	this.name = 'PLAYER';
+	this.riders = ['Mint','Lime','Grape','Lemon','Orange']
+}
+
+function Camel (owner, color, rider) {
 	this.owner = owner;
-	this.color = false;
-	this.leader = false;
+	this.color = color;
+	this.rider = rider;
 }
 
 function Tile (arr) {
@@ -271,9 +264,12 @@ function Board (width, height) {
 
 
 function TurnState (player, turn) {
+
 	this.turn = turn;
 	this.activeplayer = player;
 	this.camels = 0;
+	this.riders = 0;
+	this.lastrider = null;
 }
 
 // #########################################################################
@@ -332,8 +328,21 @@ function drawBoardState () {
 						break;
 				}
 				drawCamel(x, y, circrad, color);
+				if (tile.camel.rider === true) {
+				var color = '#F00';
+				switch	(tile.camel.owner) {
+					case '0':
+						color = '#F00';
+						break;
+					case '1':
+						color = '#00F';
+						break;
+					default:
+						break;
+				}
+				drawRider(x, y, circrad, color);
+				}
 			}
-
 		};
 	};
 }
@@ -408,6 +417,35 @@ function drawCamel (x, y, cirumradius, fill) {
 	path.lineTo((Math.cos(Math.PI * 3 / 4) * cirumradius) + center_x, ((Math.sin(Math.PI * 3 / 4) * cirumradius) + center_y));
 	path.lineTo((Math.cos(Math.PI * 5 / 4) * cirumradius) + center_x, ((Math.sin(Math.PI * 5 / 4) * cirumradius) + center_y));
 	path.lineTo((Math.cos(Math.PI * 7 / 4) * cirumradius) + center_x, ((Math.sin(Math.PI * 7 / 4) * cirumradius) + center_y));
+
+	ctx.stroke(path);
+	ctx.fillStyle = fill;
+	ctx.fill(path);
+
+}
+
+function drawRider (x, y, cirumradius, fill) {
+
+	var canvas = document.getElementById('board');
+	var ctx = canvas.getContext('2d');
+	var path = new Path2D();
+
+	var center_x = x;
+	var center_y = y;
+
+	cirumradius = cirumradius * 0.8
+
+	path.moveTo((Math.cos(Math.PI * 1 / 4) * cirumradius) + center_x, ((Math.sin(Math.PI * 1 / 4) * cirumradius) + center_y));
+	path.lineTo((Math.cos(Math.PI * 3 / 4) * cirumradius) + center_x, ((Math.sin(Math.PI * 3 / 4) * cirumradius) + center_y));
+	path.lineTo((Math.cos(Math.PI * 5 / 4) * cirumradius) + center_x, ((Math.sin(Math.PI * 5 / 4) * cirumradius) + center_y));
+	path.lineTo((Math.cos(Math.PI * 7 / 4) * cirumradius) + center_x, ((Math.sin(Math.PI * 7 / 4) * cirumradius) + center_y));
+
+	cirumradius = cirumradius * 0.7
+
+	path.moveTo((Math.cos(Math.PI * 7 / 4) * cirumradius) + center_x, ((Math.sin(Math.PI * 7 / 4) * cirumradius) + center_y));
+	path.lineTo((Math.cos(Math.PI * 5 / 4) * cirumradius) + center_x, ((Math.sin(Math.PI * 5 / 4) * cirumradius) + center_y));
+	path.lineTo((Math.cos(Math.PI * 3 / 4) * cirumradius) + center_x, ((Math.sin(Math.PI * 3 / 4) * cirumradius) + center_y));
+	path.lineTo((Math.cos(Math.PI * 1 / 4) * cirumradius) + center_x, ((Math.sin(Math.PI * 1 / 4) * cirumradius) + center_y));
 
 	ctx.stroke(path);
 	ctx.fillStyle = fill;
@@ -499,12 +537,6 @@ function PITAGORA (arr, arr2) {
 
 // UI RELATED
 
-function updateUI () {
-	document.querySelector('div [name=player]').textContent = 'Player ' + (parseInt(GAME.turn.activeplayer) + 1).toString();
-	document.querySelector('div [name=turn]').textContent = 'Turn ' + GAME.turn.turn;
-	document.querySelector('div [name=camels]').textContent = Math.abs(GAME.turn.camels - 2) + ' Camels';
-}
-
 // #########################################################################
 // ##																	  ##
 // ##						   	EVENT HANDLERS							  ##
@@ -535,31 +567,112 @@ function testClick (ev) {
 	}
 }
 
-function placeCamel (ev) {
 
-	if (GAME.turn.camels < 2) {
-		var tile = UI.selectedTile;
-		var act_pl = GAME.turn.activeplayer;
+// function play () {
+// 	var player = GAME.turn.activeplayer;
+// 	if (GAME.players[player].riders.length > 0) {
+// 		placeRider();
+// 	} else {
+// 		placeCamel();
+// 	}
+// }
 
-		GAME.turn.camels++
-		tile.camel = new Camel(act_pl);
+// function placeCamel (ev) {
 
-		drawBoardState();
-		console.log('Camel placed!', UI.selectedTile)
-	} else {
-		window.alert('No more camels!');
-	}
+// 		var tile = UI.selectedTile;
+// 		var act_pl = GAME.turn.activeplayer;
+
+// 		GAME.turn.camels++
+// 		tile.camel = new Camel(act_pl);
+
+// 		drawBoardState();
+// 		updateUI();
+
+// 		console.log('Camel placed!', UI.selectedTile)
 	
+// }
+
+function placeRider () {
+
+	var player = GAME.turn.activeplayer;
+	
+	var clr_select = document.querySelector('div#color').children
+	var color;
+
+	for (var i = 0; i < clr_select.length; i++) {
+		if (clr_select[i].checked === true) {
+			color = clr_select[i].value;
+		}
+	};
+
+	var legality = riderCheck();
+
+	if (legality === true) {
+
+		for (var i = 0; i < GAME.players[player].riders.length; i++) {
+			if (GAME.players[player].riders[i] === color) {
+				GAME.players[player].riders.splice(i, 1);
+				console.log('riders left: ', GAME.players[player].riders.length)
+			}
+		};
+
+		UI.selectedTile.camel = new Camel (player, color, true);
+		GAME.turn.lastrider = color;
+		GAME.turn.riders++;
+	};	
 }
 
-function newTurn (ev) {
-	var player = (GAME.turn.activeplayer + 1) % 2;
-	var turn = GAME.turn.turn + 1;
-	GAME.turn = new TurnState(player, turn);
-	updateUI();
+function dummyRider () {
+	var tile = [3,4];
+	var player = 1;
+	var color = 'Mint';
+	UI.selectedTile.camel = new Camel (player, color, true);
 }
+
+// function camelCheck () {
+// 	if (GAME.turn.turn = 1 && GAME.turn.camels >= 1) {
+// 		return false
+// 	} else if (GAME.turn.camels >= 2) {
+// 		return false
+// 	} else if (UI.selectedTile.oasis === true) {
+// 		return false
+// 	} else if ()
+// }
+
+function riderCheck (color) {
+	var player = GAME.turn.activeplayer
+	if (GAME.turn.riders > 1) {
+		return false;
+	} if (GAME.turn.lastrider === color && GAME.turn.turn === 2) {
+		return false;
+	} if (GAME.players[player].riders.length < 1) {
+		return false;
+	} else {
+		return true;
+	}
+}
+
+// function newTurn (ev) {
+// 	var player = (GAME.turn.activeplayer + 1) % 2;
+// 	var turn = GAME.turn.turn + 1;
+// 	GAME.turn = new TurnState(player, turn);
+// 	updateUI();
+// }
 
 
 
 document.body.onload = prepareBoard;
 document.querySelector('canvas').addEventListener('click', testClick);
+
+function prepareBoard () {
+	
+	GAME.board.setImpassable();
+	var splice = GAME.board.setOasis()[0];
+	GAME.board.setWaterholes(splice);
+	drawBoardState();
+}
+
+	// document.querySelector('button').addEventListener('click', placeCamel);
+	// document.querySelector('button + button').addEventListener('click', GAME.board.clearBoard.bind(GAME.board));
+	// document.querySelector('button + button + button').addEventListener('click', newTurn);
+
