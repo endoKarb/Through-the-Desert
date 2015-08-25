@@ -96,6 +96,14 @@ var GAME = {
 	'camels_played': 0
 };
 
+var STASH = {
+	'Mint': 24,
+	'Lime': 24,
+	'Grape': 24,
+	'Lemon': 24,
+	'Orange': 24
+}
+
 var UI = {
 	'selectedTile': null
 };
@@ -299,15 +307,7 @@ function drawBoardState () {
 			} else if (tile.waterhole != false) {
 				draw_hexagon(x, y, circrad, '#36D');
 				drawNumber(tile);
-			} else {
-				draw_hexagon(x, y, circrad, '#AA8');
-			}
-
-			if (tile.selected === true) {
-				drawEmptyHex(x, y, circrad, '#FA8');
-			}
-
-			if (tile.camel != false) {
+			} else if (tile.camel != false) {
 				var color = '#FFF'
 				switch	(tile.camel.color) {
 					case 'Mint':
@@ -328,21 +328,27 @@ function drawBoardState () {
 					default:
 						break;
 				}
-				drawCamel(x, y, circrad, color);
+				draw_hexagon(x, y, circrad, color);
 				if (tile.camel.rider === true) {
 				var color = '#FFF';
 				switch	(tile.camel.owner) {
 					case 0:
-						color = '#F00';
+						color = '#FFF';
 						break;
 					case 1:
-						color = '#00F';
+						color = '#000';
 						break;
 					default:
 						break;
 				}
 				drawRider(x, y, circrad, color);
 				}
+			} else {
+				draw_hexagon(x, y, circrad, '#AA8');
+			}
+
+			if (tile.selected === true) {
+				drawEmptyHex(x, y, circrad, '#FA8');
 			}
 		};
 	};
@@ -433,24 +439,16 @@ function drawRider (x, y, cirumradius, fill) {
 
 	var center_x = x;
 	var center_y = y;
+	console.log (x, y);
 
-	cirumradius = cirumradius * 0.8
+	// debugger;
+	ctx.beginPath();
+	ctx.arc(x, y, cirumradius * 0.25, 0, Math.PI * 2, true);
 
-	path.moveTo((Math.cos(Math.PI * 1 / 4) * cirumradius) + center_x, ((Math.sin(Math.PI * 1 / 4) * cirumradius) + center_y));
-	path.lineTo((Math.cos(Math.PI * 3 / 4) * cirumradius) + center_x, ((Math.sin(Math.PI * 3 / 4) * cirumradius) + center_y));
-	path.lineTo((Math.cos(Math.PI * 5 / 4) * cirumradius) + center_x, ((Math.sin(Math.PI * 5 / 4) * cirumradius) + center_y));
-	path.lineTo((Math.cos(Math.PI * 7 / 4) * cirumradius) + center_x, ((Math.sin(Math.PI * 7 / 4) * cirumradius) + center_y));
-
-	cirumradius = cirumradius * 0.7
-
-	path.moveTo((Math.cos(Math.PI * 7 / 4) * cirumradius) + center_x, ((Math.sin(Math.PI * 7 / 4) * cirumradius) + center_y));
-	path.lineTo((Math.cos(Math.PI * 5 / 4) * cirumradius) + center_x, ((Math.sin(Math.PI * 5 / 4) * cirumradius) + center_y));
-	path.lineTo((Math.cos(Math.PI * 3 / 4) * cirumradius) + center_x, ((Math.sin(Math.PI * 3 / 4) * cirumradius) + center_y));
-	path.lineTo((Math.cos(Math.PI * 1 / 4) * cirumradius) + center_x, ((Math.sin(Math.PI * 1 / 4) * cirumradius) + center_y));
-
-	ctx.stroke(path);
+	ctx.strokeStyle = "black";
+	ctx.stroke();
 	ctx.fillStyle = fill;
-	ctx.fill(path);
+	ctx.fill();
 
 }
 
@@ -578,11 +576,13 @@ function placeCamel (ev) {
 		if (legal === true) {
 
 			tile.camel = new Camel(act_pl, color, false);
+			STASH[color]--
 			GAME.camels_played++;
 
 			drawBoardState();
 
-			console.log('Camel placed!', UI.selectedTile)
+			console.log('Camel placed!', UI.selectedTile);
+			console.log(color + ' left ' + STASH[color]);
 			
 		} else {
 			
@@ -590,6 +590,14 @@ function placeCamel (ev) {
 		}
 		
 	
+}
+
+function play () {
+	if (GAME.turn > 10) {
+		placeCamel()
+	} else {
+		placeRider()
+	}
 }
 
 function placeRider (ev) {
@@ -604,11 +612,13 @@ function placeRider (ev) {
 		if (legal != false) {
 
 			tile.camel = new Camel(act_pl, color, true);
+			STASH[color]--
 			GAME.camels_played++;
 
 			drawBoardState();
 
 			console.log('Rider placed!', UI.selectedTile)
+			console.log(color + ' left ' + STASH[color])
 			
 		} else {
 			
@@ -626,20 +636,28 @@ function camelLegality () {
 		return false
 	} else if (UI.selectedTile.impassable === true || UI.selectedTile.oasis === true) {
 		return false
+	} else if (STASH[getColor()] === 0) {
+		return false
 	}
 }
 
 function riderLegality () {
 	
 	if (GAME.turn > 10) {
+		console.log('no riders after turn 10');
 		return false;
 	} else if (UI.selectedTile.camel !=	 false) {
+		console.log('tile already occupied');
 		return false
 	} else if (GAME.camels_played === 1) {
+		console.log('rider already placed this turn');
 		return false
 	} else if (UI.selectedTile.impassable === true || UI.selectedTile.oasis === true) {
+		console.log('rider already placed this turn');
 		return false
 	} else if (GAME.board.colorRider(getColor()) === getColor()) {
+		return false
+	} else if (STASH[getColor()] === 0) {
 		return false
 	}
 }
@@ -656,9 +674,15 @@ function getColor () {
 // }
 
 function nextTurn () {
-	GAME.turn++;
-	GAME.camels_played = 0;
-	writeLog();
+	if (GAME.camels_played === 0) {
+
+	} else if (GAME.camels_played === 1 && GAME.turn > 10) {
+
+	} else {
+		GAME.turn++;
+		GAME.camels_played = 0;
+		writeLog();
+	}
 }
 
 function writeLog () {
@@ -680,9 +704,112 @@ function prepareBoard () {
 
 function addListeners () {
 	document.querySelector('canvas').addEventListener('click', testClick);
-	document.querySelector('button').addEventListener('click', placeCamel);
+	document.querySelector('button').addEventListener('click', play);
 	document.querySelector('button + button').addEventListener('click', placeRider);
 	document.querySelector('button + button + button').addEventListener('click', GAME.board.clearBoard.bind(GAME.board));
 	document.querySelector('button + button + button + button').addEventListener('click', nextTurn);
+	document.querySelector('input[name=inputbox]').addEventListener('keydown', textHandler);
 }
 	
+
+function textHandler (ev) {
+	console.log(ev.target.value);
+	if (ev.keyCode === 13) {
+		parseMove(ev.target.value);
+	}
+}
+
+
+
+function parseMove (str) {
+	//Takes a 3 character string and parses the relative move
+	var result = [];
+	if (str.length === 3) {
+		var color = str.charAt(0)
+		var column = str.charAt(1)
+		var row = parseInt(str.charAt(2));
+		console.log(color, column, row);
+		debugger;
+		switch (color) {
+			case 'M':
+				result.push('Mint')
+				break;
+			case 'L':
+				result.push('Lime')
+				break;
+			case 'G':
+				result.push('Grape')
+				break;
+			case 'E':
+				result.push('Lemon')
+				break;
+			case 'O':
+				result.push('Orange')
+				break;
+			default :
+				throw ("unrecognized character")
+				break;
+		}
+		switch (column) {
+			case 'a':
+				result.push(0)
+				break;
+			case 'b':
+				result.push(1)
+				break;
+			case 'c':
+				result.push(2)
+				break;
+			case 'd':
+				result.push(3)
+				break;
+			case 'e':
+				result.push(4)
+				break;
+			case 'f':
+				result.push(5)
+				break;
+			case 'g':
+				result.push(6)
+				break;
+			case 'h':
+				result.push(7)
+				break;
+			case 'i':
+				result.push(8)
+				break;
+			case 'j':
+				result.push(9)
+				break;
+			case 'k':
+				result.push(10)
+				break;
+			case 'l':
+				result.push(11)
+				break;
+			case 'm':
+				result.push(12)
+				break;
+			case 'n':
+				result.push(13)
+				break;
+			case 'o':
+				result.push(14)
+				break;
+			case 'p':
+				result.push(15)
+				break;
+			case 'q':
+				result.push(16)
+				break;
+			case 'r':
+				result.push(17)
+				break;
+			default :
+				throw ("unrecognized character")
+		}
+	result.push(row);
+	console.log(result);
+	}
+	
+}
