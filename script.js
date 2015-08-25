@@ -241,10 +241,6 @@ function Board (width, height, tilesize) {
 		return this.board[arr[0]][arr[1]];
 	}
 
-	this.printBoard = function () {
-		draw_hexmap (this.width, this.height, this.tilesize, "#BA8");
-	}
-
 	this.getImpassable = function () {
 		var tiles = [];
 		var callback = function (tile, index) {
@@ -312,6 +308,10 @@ function Board (width, height, tilesize) {
 
 function drawBoardState () {
 
+	var canvas = document.getElementById('board');
+	var ctx = canvas.getContext('2d');
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+
 	for (var i = 0; i < BOARD.board.length; i++) {
 		for (var j = 0; j < BOARD.board[i].length; j++) {
 
@@ -330,11 +330,37 @@ function drawBoardState () {
 			} else {
 				draw_hexagon(x, y, circrad, '#AA8');
 			}
+
+			if (tile.selected === true) {
+				drawEmptyHex(x, y, circrad, '#FA8');
+			}
 		};
 	};
 }
 
 function draw_hexagon (x, y, cirumradius, fill) {
+
+	var canvas = document.getElementById('board');
+	var ctx = canvas.getContext('2d');
+	var path = new Path2D();
+
+	var center_x = x;
+	var center_y = y;
+
+	path.moveTo((Math.cos(Math.PI * 1 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 1 / 3) * cirumradius) + center_y));
+	path.lineTo((Math.cos(Math.PI * 2 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 2 / 3) * cirumradius) + center_y));
+	path.lineTo((Math.cos(Math.PI * 3 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 3 / 3) * cirumradius) + center_y));
+	path.lineTo((Math.cos(Math.PI * 4 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 4 / 3) * cirumradius) + center_y));
+	path.lineTo((Math.cos(Math.PI * 5 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 5 / 3) * cirumradius) + center_y));
+	path.lineTo((Math.cos(Math.PI * 6 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 6 / 3) * cirumradius) + center_y));
+	path.lineTo((Math.cos(Math.PI * 7 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 7 / 3) * cirumradius) + center_y));
+
+	ctx.stroke(path);
+	ctx.fillStyle = fill;
+	ctx.fill(path);
+}
+
+function drawEmptyHex (x, y, cirumradius, fill) {
 
 	var canvas = document.getElementById('board');
 
@@ -351,7 +377,17 @@ function draw_hexagon (x, y, cirumradius, fill) {
     	path.lineTo((Math.cos(Math.PI * 4 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 4 / 3) * cirumradius) + center_y));
     	path.lineTo((Math.cos(Math.PI * 5 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 5 / 3) * cirumradius) + center_y));
     	path.lineTo((Math.cos(Math.PI * 6 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 6 / 3) * cirumradius) + center_y));
-    	path.lineTo((Math.cos(Math.PI * 7 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 7 / 3) * cirumradius) + center_y));
+    	path.closePath();
+
+    	cirumradius = cirumradius * 1.275
+
+    	path.moveTo((Math.cos(Math.PI * 7 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 7 / 3) * cirumradius) + center_y));
+    	path.lineTo((Math.cos(Math.PI * 6 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 6 / 3) * cirumradius) + center_y));
+    	path.lineTo((Math.cos(Math.PI * 5 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 5 / 3) * cirumradius) + center_y));
+    	path.lineTo((Math.cos(Math.PI * 4 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 4 / 3) * cirumradius) + center_y));
+    	path.lineTo((Math.cos(Math.PI * 3 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 3 / 3) * cirumradius) + center_y));
+    	path.lineTo((Math.cos(Math.PI * 2 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 2 / 3) * cirumradius) + center_y));
+    	path.closePath();
 
     	ctx.stroke(path);
     	ctx.fillStyle = fill;
@@ -359,96 +395,96 @@ function draw_hexagon (x, y, cirumradius, fill) {
 	}
 }
 
-function draw_hexmap (width, height, tilesize, fill) {
+// function draw_hexmap (width, height, tilesize, fill) {
 
-	if (typeof width != 'number' || typeof height != 'number' || typeof tilesize != 'number') {
-		throw "draw_hexmap: invalid argument";
-	};
+// 	if (typeof width != 'number' || typeof height != 'number' || typeof tilesize != 'number') {
+// 		throw "draw_hexmap: invalid argument";
+// 	};
 
-	for (var i = 0; i < width; i++) {
+// 	for (var i = 0; i < width; i++) {
 
-		for (var j = 0; j < height; j++) {
+// 		for (var j = 0; j < height; j++) {
 
-			if (i % 2 > 0) {
+// 			if (i % 2 > 0) {
 
-				/*console.log ('uneven!');*/
-				var x = i * tilesize * 1.75 + tilesize;
-				var y = j * tilesize * 2 + tilesize + tilesize;
-				draw_hexagon(x, y, tilesize, fill);
+// 				/*console.log ('uneven!');*/
+// 				var x = i * tilesize * 1.75 + tilesize;
+// 				var y = j * tilesize * 2 + tilesize + tilesize;
+// 				draw_hexagon(x, y, tilesize, fill);
 
-			} else {
+// 			} else {
 
-				/*console.log ('even!');*/
-				var x = i * tilesize * 1.75 + tilesize;
-				var y = j * tilesize * 2 + tilesize;
-				draw_hexagon(x, y, tilesize, fill);
+// 				/*console.log ('even!');*/
+// 				var x = i * tilesize * 1.75 + tilesize;
+// 				var y = j * tilesize * 2 + tilesize;
+// 				draw_hexagon(x, y, tilesize, fill);
 
-			}
-		};
-	};
-}
+// 			}
+// 		};
+// 	};
+// }
 
-function draw_oasis (fill) {
+// function draw_oasis (fill) {
 
-	var arr = BOARD.getOasis();
+// 	var arr = BOARD.getOasis();
 
-	if (typeof arr[0][1] != 'number' || typeof BOARD.tilesize != 'number') {
-		throw 'draw_hexmap: invalid argument';
-	};
+// 	if (typeof arr[0][1] != 'number' || typeof BOARD.tilesize != 'number') {
+// 		throw 'draw_hexmap: invalid argument';
+// 	};
 
-	for (var i = 0; i < arr.length; i++) {
+// 	for (var i = 0; i < arr.length; i++) {
 
-		if (arr[i][0] % 2 > 0) {
+// 		if (arr[i][0] % 2 > 0) {
 
-			/*console.log ('uneven!');*/
-			var x = arr[i][0] * BOARD.tilesize * 1.75 + BOARD.tilesize;
-			var y = arr[i][1] * BOARD.tilesize * 2 + BOARD.tilesize + BOARD.tilesize;
-			draw_hexagon(x, y, BOARD.tilesize, fill);
+// 			/*console.log ('uneven!');*/
+// 			var x = arr[i][0] * BOARD.tilesize * 1.75 + BOARD.tilesize;
+// 			var y = arr[i][1] * BOARD.tilesize * 2 + BOARD.tilesize + BOARD.tilesize;
+// 			draw_hexagon(x, y, BOARD.tilesize, fill);
 
-		} else {
+// 		} else {
 
-			/*console.log ('even!');*/
-			var x = arr[i][0] * BOARD.tilesize * 1.75 + BOARD.tilesize;
-			var y = arr[i][1] * BOARD.tilesize * 2 + BOARD.tilesize;
-			draw_hexagon(x, y, BOARD.tilesize, fill);
+// 			/*console.log ('even!');*/
+// 			var x = arr[i][0] * BOARD.tilesize * 1.75 + BOARD.tilesize;
+// 			var y = arr[i][1] * BOARD.tilesize * 2 + BOARD.tilesize;
+// 			draw_hexagon(x, y, BOARD.tilesize, fill);
 
-		}
-	};
-}
+// 		}
+// 	};
+// }
 
-function draw_impassable (fill) {
+// function draw_impassable (fill) {
 
-	var arr = BOARD.getImpassable();
+// 	var arr = BOARD.getImpassable();
 
-	if (typeof arr[0][1] != 'number' || typeof BOARD.tilesize != 'number') {
-		throw 'draw_hexmap: invalid argument';
-	};
+// 	if (typeof arr[0][1] != 'number' || typeof BOARD.tilesize != 'number') {
+// 		throw 'draw_hexmap: invalid argument';
+// 	};
 
-	for (var i = 0; i < arr.length; i++) {
+// 	for (var i = 0; i < arr.length; i++) {
 
-		if (arr[i][0] % 2 > 0) {
+// 		if (arr[i][0] % 2 > 0) {
 
-			/*console.log ('uneven!');*/
-			var x = arr[i][0] * BOARD.tilesize * 1.75 + BOARD.tilesize;
-			var y = arr[i][1] * BOARD.tilesize * 2 + BOARD.tilesize + BOARD.tilesize;
-			draw_hexagon(x, y, BOARD.tilesize, fill);
+// 			/*console.log ('uneven!');*/
+// 			var x = arr[i][0] * BOARD.tilesize * 1.75 + BOARD.tilesize;
+// 			var y = arr[i][1] * BOARD.tilesize * 2 + BOARD.tilesize + BOARD.tilesize;
+// 			draw_hexagon(x, y, BOARD.tilesize, fill);
 
-		} else {
+// 		} else {
 
-			/*console.log ('even!');*/
-			var x = arr[i][0] * BOARD.tilesize * 1.75 + BOARD.tilesize;
-			var y = arr[i][1] * BOARD.tilesize * 2 + BOARD.tilesize;
-			draw_hexagon(x, y, BOARD.tilesize, fill);
+// 			/*console.log ('even!');*/
+// 			var x = arr[i][0] * BOARD.tilesize * 1.75 + BOARD.tilesize;
+// 			var y = arr[i][1] * BOARD.tilesize * 2 + BOARD.tilesize;
+// 			draw_hexagon(x, y, BOARD.tilesize, fill);
 
-		}
-	};
-}
+// 		}
+// 	};
+// }
 
-function draw_waterholes () {
-	var holes = BOARD.getWaterholes();
-	// console.log(holes);
-	holes.map(drawNumber);
-}
+// function draw_waterholes () {
+// 	var holes = BOARD.getWaterholes();
+// 	// console.log(holes);
+// 	holes.map(drawNumber);
+// }
 
 function drawNumber (tile) {
 	var x = tile.center[2]
@@ -474,6 +510,15 @@ function drawNumber (tile) {
 	ctx.fillText('' + tile.waterhole,  origin_x, origin_y);
 
 }
+
+
+
+// #################################################################
+// #################################################################
+// ##					Click-related FUNCTIONS					####
+// #################################################################
+// #################################################################
+
 
 function isTile (arr, arr1) {
 	//Tells if the first point belongs to the tile centered in the second point
@@ -539,6 +584,7 @@ function testClick (ev) {
 		BOARD.resetClicked();
 		BOARD.board[tile[0]][tile[1]].selected = true;
 		console.log('Tile', BOARD.board[tile[0]][tile[1]].center[2], BOARD.board[tile[0]][tile[1]].center[3], 'selected.');
+		drawBoardState();
 	} else {
 		console.log("Not a tile");
 	}
