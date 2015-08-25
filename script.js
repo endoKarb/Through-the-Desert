@@ -228,7 +228,7 @@ function Tile (arr) {
 	this.selected = false;
 }
 
-function Board (width, height, tilesize) {
+function Board (width, height) {
 	// Transform an array of rows in a Board object made of list of Tile objects
 
 	this.board = [];
@@ -249,7 +249,52 @@ function Board (width, height, tilesize) {
 	this.getTile = function (arr) {
 		// console.log(arr, arr[0], arr[1]);
 		// Takes an array of coordinates and returns the corresponding Tile object
-		return this.board[arr[0]][arr[1]];
+		if (arr[0] < 0 || arr[0] >= this.width || arr[1] < 0 || arr[1] >= this.height) {
+			return null;
+		} else {
+			return this.board[arr[0]][arr[1]];
+		}
+		
+	}
+
+	this.getAdjacent = function (arr) {
+		// Takes an array of coordinates and returns the adjacent Tile objects
+		var x = arr[0];
+		var y = arr[1];
+		var tiles_to_find = [];
+		var adj_tiles = [];
+
+		switch (x % 2) {
+			case 0:
+				tiles_to_find = [
+					[x, y+1],
+					[x+1,y],
+					[x,y-1],
+					[x-1,y-1],
+					[x-1,y],
+					[x+1,y-1],
+				];
+				break;
+			default:
+				tiles_to_find = [
+					[x,y-1],
+					[x,y+1],
+					[x-1,y+1],
+					[x-1,y],
+					[x+1,y],
+					[x+1,y+1],
+				];
+				console.log('duh');
+				break;
+		}
+		
+		for (var i = 0; i < tiles_to_find.length; i++) {
+			if (tiles_to_find[i][0] < 0 || tiles_to_find[i][0] >= this.width || tiles_to_find[i][1] < 0 || tiles_to_find[i][1] >= this.height) {
+			} else {
+				adj_tiles.push(BOARD.board[tiles_to_find[i][0]][tiles_to_find[i][1]])
+			}
+		console.log(adj_tiles);
+		};
 	}
 
 	this.getImpassable = function () {
