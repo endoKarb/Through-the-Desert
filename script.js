@@ -568,66 +568,71 @@ function testClick (ev) {
 }
 
 
-// function play () {
+function placeCamel (ev) {
+
+		var tile = UI.selectedTile;
+		var act_pl = GAME.turn.activeplayer;
+		var color = getColor();
+
+		tile.camel = new Camel(act_pl, color, false);
+
+		drawBoardState();
+
+		console.log('Camel placed!', UI.selectedTile)
+	
+}
+
+function placeRider (ev) {
+
+		var tile = UI.selectedTile;
+		var act_pl = GAME.turn.activeplayer;
+		var color = getColor();
+
+		
+
+		tile.camel = new Camel(act_pl, color, true);
+
+		drawBoardState();
+
+		console.log('Camel placed!', UI.selectedTile)
+	
+}
+
+
+function getColor () {
+	var sel = document.getElementById("color");
+	return sel.options[sel.selectedIndex].value;
+}
+
+// function placeRider () {
+
 // 	var player = GAME.turn.activeplayer;
-// 	if (GAME.players[player].riders.length > 0) {
-// 		placeRider();
-// 	} else {
-// 		placeCamel();
-// 	}
-// }
-
-// function placeCamel (ev) {
-
-// 		var tile = UI.selectedTile;
-// 		var act_pl = GAME.turn.activeplayer;
-
-// 		GAME.turn.camels++
-// 		tile.camel = new Camel(act_pl);
-
-// 		drawBoardState();
-// 		updateUI();
-
-// 		console.log('Camel placed!', UI.selectedTile)
 	
+// 	var clr_select = document.querySelector('div#color').children
+// 	var color;
+
+// 	for (var i = 0; i < clr_select.length; i++) {
+// 		if (clr_select[i].checked === true) {
+// 			color = clr_select[i].value;
+// 		}
+// 	};
+
+// 	var legality = riderCheck();
+
+// 	if (legality === true) {
+
+// 		for (var i = 0; i < GAME.players[player].riders.length; i++) {
+// 			if (GAME.players[player].riders[i] === color) {
+// 				GAME.players[player].riders.splice(i, 1);
+// 				console.log('riders left: ', GAME.players[player].riders.length)
+// 			}
+// 		};
+
+// 		UI.selectedTile.camel = new Camel (player, color, true);
+// 		GAME.turn.lastrider = color;
+// 		GAME.turn.riders++;
+// 	};	
 // }
-
-function placeRider () {
-
-	var player = GAME.turn.activeplayer;
-	
-	var clr_select = document.querySelector('div#color').children
-	var color;
-
-	for (var i = 0; i < clr_select.length; i++) {
-		if (clr_select[i].checked === true) {
-			color = clr_select[i].value;
-		}
-	};
-
-	var legality = riderCheck();
-
-	if (legality === true) {
-
-		for (var i = 0; i < GAME.players[player].riders.length; i++) {
-			if (GAME.players[player].riders[i] === color) {
-				GAME.players[player].riders.splice(i, 1);
-				console.log('riders left: ', GAME.players[player].riders.length)
-			}
-		};
-
-		UI.selectedTile.camel = new Camel (player, color, true);
-		GAME.turn.lastrider = color;
-		GAME.turn.riders++;
-	};	
-}
-
-function dummyRider () {
-	var tile = [3,4];
-	var player = 1;
-	var color = 'Mint';
-	UI.selectedTile.camel = new Camel (player, color, true);
-}
 
 // function camelCheck () {
 // 	if (GAME.turn.turn = 1 && GAME.turn.camels >= 1) {
@@ -639,18 +644,18 @@ function dummyRider () {
 // 	} else if ()
 // }
 
-function riderCheck (color) {
-	var player = GAME.turn.activeplayer
-	if (GAME.turn.riders > 1) {
-		return false;
-	} if (GAME.turn.lastrider === color && GAME.turn.turn === 2) {
-		return false;
-	} if (GAME.players[player].riders.length < 1) {
-		return false;
-	} else {
-		return true;
-	}
-}
+// function riderCheck (color) {
+// 	var player = GAME.turn.activeplayer
+// 	if (GAME.turn.riders > 1) {
+// 		return false;
+// 	} if (GAME.turn.lastrider === color && GAME.turn.turn === 2) {
+// 		return false;
+// 	} if (GAME.players[player].riders.length < 1) {
+// 		return false;
+// 	} else {
+// 		return true;
+// 	}
+// }
 
 // function newTurn (ev) {
 // 	var player = (GAME.turn.activeplayer + 1) % 2;
@@ -662,17 +667,21 @@ function riderCheck (color) {
 
 
 document.body.onload = prepareBoard;
-document.querySelector('canvas').addEventListener('click', testClick);
+
 
 function prepareBoard () {
 	
+	addListeners();
 	GAME.board.setImpassable();
 	var splice = GAME.board.setOasis()[0];
 	GAME.board.setWaterholes(splice);
 	drawBoardState();
 }
 
-	// document.querySelector('button').addEventListener('click', placeCamel);
-	// document.querySelector('button + button').addEventListener('click', GAME.board.clearBoard.bind(GAME.board));
-	// document.querySelector('button + button + button').addEventListener('click', newTurn);
-
+function addListeners () {
+	document.querySelector('canvas').addEventListener('click', testClick);
+	document.querySelector('button').addEventListener('click', placeCamel);
+	document.querySelector('button + button').addEventListener('click', placeRider);
+	document.querySelector('button + button + button').addEventListener('click', GAME.board.clearBoard.bind(GAME.board));
+}
+	
