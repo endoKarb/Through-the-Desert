@@ -606,9 +606,9 @@ function placeCamel (color) {
 		var tile = UI.selectedTile;
 		var act_pl = GAME.activePlayer();
 
-		var legal = true
+		var legal = camelLegality(color);
 
-		if (legal === true) {
+		if (legal != false) {
 
 			var coor = [UI.selectedTile.coor[0], UI.selectedTile.coor[1]]
 			tile.camel = new Camel(act_pl, color, false);
@@ -647,6 +647,10 @@ function placeRider (color) {
 
 			console.log('Rider placed!', UI.selectedTile)
 			console.log(color + ' left ' + STASH[color])
+
+			if (STASH[color] === 0) {
+				window.alert('GAME OVER!');
+			};
 			
 		} else {
 			
@@ -655,19 +659,26 @@ function placeRider (color) {
 	
 }
 
-// function camelLegality () {
-// 	if (GAME.turn < 11) {
-// 		return false;
-// 	} else if (UI.selectedTile.camel != false) {
-// 		return false
-// 	} else if (GAME.camels_played === 2) {
-// 		return false
-// 	} else if (UI.selectedTile.impassable === true || UI.selectedTile.oasis === true) {
-// 		return false
-// 	} else if (STASH[getColor()] === 0) {
-// 		return false
-// 	}
-// }
+function camelLegality (color) {
+	var adj_til = GAME.board.getAdjacent(UI.selectedTile.coor);
+
+	if (GAME.turn < 10) {
+		console.log('No camels before turn 10');
+		return false;
+	} else if (UI.selectedTile.camel !=	 false) {
+		console.log('Tile already occupied');
+		return false
+	} else if (UI.selectedTile.impassable === true || UI.selectedTile.oasis === true) {
+		console.log('Can\'t play there');
+		return false
+	} else if (allyColorExists(color, adj_til) === false) {
+		console.log('Must play adjacent to same color');
+		return false
+	} else if (enemyColorExists(color, adj_til) === true) {
+		console.log('Can\'t play next to enemy of same color');
+		return false
+	}
+}
 
 function riderLegality (color) {
 	
@@ -679,17 +690,14 @@ function riderLegality (color) {
 	} else if (UI.selectedTile.camel !=	 false) {
 		console.log('Tile already occupied');
 		return false
-	} else if (UI.selectedTile.impassable === true || UI.selectedTile.oasis === true) {
+	} else if (UI.selectedTile.impassable === true || UI.selectedTile.oasis === true || UI.selectedTile.waterhole > 0) {
 		console.log('Can\'t play there');
 		return false
 	} else if (GAME.board.colorRider(color) === color) {
 		console.log('One rider per color');
 		return false
-	} else if (colorExists(color, adj_til) === true) {
-		console.log('Can\'t play adjacent same color');
-		return false
-	} else if (oasisExists(adj_til) === true) {
-		console.log('Can\'t play near oasis');
+	} else if (riderExists(adj_til) === true) {
+		console.log('Can\'t play adjacent other riders');
 		return false
 	} else if (oasisExists(adj_til) === true) {
 		console.log('Can\'t play near oasis');
@@ -700,10 +708,30 @@ function riderLegality (color) {
 	}
 }
 
-function colorExists (color, tile_arr) {
+function allyColorExists (color, tile_arr) {
 	//Tells you if a camel of "color" exists in the tiles specified in the "tile_arr"
 	for (var i = 0; i < tile_arr.length; i++) {
-		if (tile_arr[i].camel.color === color) {
+		if (tile_arr[i].camel.color === color && tile_arr[i].camel.owner === GAME.activePlayer()) {
+			return true;
+		}
+	};
+	return false;
+}
+
+function enemyColorExists (color, tile_arr) {
+	//Tells you if a camel of "color" exists in the tiles specified in the "tile_arr"
+	for (var i = 0; i < tile_arr.length; i++) {
+		if (tile_arr[i].camel.color === color && tile_arr[i].camel.owner != GAME.activePlayer()) {
+			return true;
+		}
+	};
+	return false;
+}
+
+function riderExists (tile_arr) {
+	//Tells you if a rider exists in the tiles specified in the "tile_arr"
+	for (var i = 0; i < tile_arr.length; i++) {
+		if (tile_arr[i].camel.rider === true) {
 			return true;
 		}
 	};

@@ -11,10 +11,27 @@
 			height: 24px;
 			width: 500px;
 		}
+		div#activeplayer .player {
+			border-style: solid;
+			border-color: red;
+			display: inline-block;
+			width: 150px
+		}
+		div#activeplayer .white {
+			background-color: white;
+		}
+		div#activeplayer .black {
+			color: white;
+			background-color: black;	
+		}
 	</style>
 </head>
 <body>
 	<div>Through the Desert</div>
+	<div id="activeplayer">
+		<span class="white player">Player 1</span>
+		<span class="black player">Player 2</span>
+	</div>
 	<div>
 		<canvas id="board" height="700px" width="1000px"></canvas>
 	</div>
@@ -26,9 +43,5 @@
 		<button value="Orange" class="colorbutton">Orange Camel</button>
 	</div>
 	<script src="script.js"></script>
-	<div id="stats">
-		Active Player: <span name="player"></span> 
-		Current Turn: <span name="turn"></span> 
-	</div>
 </body>
 
