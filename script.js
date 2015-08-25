@@ -830,3 +830,51 @@ function addListeners () {
 	document.querySelector('canvas').addEventListener('click', testClick);
 	document.querySelector('div#color').addEventListener('click', buttonHandler);
 }
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+function addFrontier (coord) {
+
+	var result = [];
+	var frontier = GAME.board.getAdjacent(coord);
+	debugger;
+	for (var i = 0; frontier.length > 0; i = i) {
+
+		if (frontier[i].visited === true || frontier[i].impassable === true) {
+			
+			frontier.splice(i, 1);
+
+		} else {
+
+			frontier[i].visited = true;
+			var new_neigh = GAME.board.getAdjacent(frontier[i].coor);
+
+			for (var j = 0; j < new_neigh.length; j++) {
+				
+				if (new_neigh[j].visited === true) {
+
+				} else {
+					frontier.push(new_neigh[j]);
+				}
+			}
+
+			result.push(frontier.splice(i, 1)[0]);
+		}
+	};
+
+	resetVisited();
+	console.log(result);
+}
+
+function resetVisited () {
+	var board = GAME.board.board;
+	for (var i = 0; i < board.length; i++) {
+		for (var j = 0; j < board[i].length; j++) {
+			board[i][j].visited = false;
+		};
+	};
+}
