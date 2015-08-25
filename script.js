@@ -94,6 +94,7 @@ var GAME = {
 	'board': new Board(18, 13),
 	'turns': [],
 	'riders_placed': [[],[]],
+	'points': [0,0],
 	'currentTurn': function () {
 		if (this.turns.length < 11) {
 			return this.turns.length;
@@ -575,7 +576,6 @@ function PITAGORA (arr, arr2) {
 
 function updateUI () {
 
-	debugger;
 	var colors = {
 		'Mint': '#BEF6E9',
 		'Lime': '#DBFEA5',
@@ -583,8 +583,10 @@ function updateUI () {
 		'Lemon': '#FBFDE3',
 		'Orange': '#F5A886'
 	};
-	var player1 = document.querySelector('div .white');
-	var player2 = document.querySelector('div .black');
+	var player1 = document.querySelector('div .white.player');
+	var player2 = document.querySelector('div .black.player');
+	var white_points = document.querySelector('div .white.points');
+	var black_points = document.querySelector('div .black.points');
 	var buttons = document.querySelector('div#color');
 
 	if (GAME.activePlayer() === 0) {
@@ -608,6 +610,10 @@ function updateUI () {
 			buttons.children[i].style.backgroundColor = colors[buttons.children[i].value];
 		}
 	}
+
+	white_points.textContent = GAME.points[0];
+	black_points.textContent = GAME.points[1];
+
 }
 
 function testClick (ev) {
@@ -656,6 +662,11 @@ function placeCamel (color) {
 		var legal = camelLegality(color);
 
 		if (legal != false) {
+
+			if (UI.selectedTile.waterhole > 0) {
+				GAME.points[act_pl] = GAME.points[act_pl] + UI.selectedTile.waterhole;
+				console.log ('POINTS: ' + GAME.points[act_pl])
+			};
 
 			var coor = [UI.selectedTile.coor[0], UI.selectedTile.coor[1]]
 			tile.camel = new Camel(act_pl, color, false);
