@@ -105,7 +105,14 @@ var STASH = {
 }
 
 var UI = {
-	'selectedTile': null
+	'selectedTile': null,
+	'returnSelected': function () {
+		if ('selectedTile' === null) {
+			return null;
+		} else {
+			return this.selectedTile;
+		}
+	}
 };
 
 
@@ -559,12 +566,26 @@ function testClick (ev) {
 		drawBoardState();
 
 	} else {
+		
+		GAME.board.resetClicked();
+		UI.selectedTile = null;
 		console.log("Not a tile");
+		drawBoardState();
 	}
 }
 
 
-function placeCamel (ev) {
+
+
+function play () {
+	if (GAME.turn > 10) {
+		placeCamel()
+	} else {
+		placeRider()
+	}
+}
+
+function placeCamel () {
 
 		var tile = UI.selectedTile;
 		var act_pl = GAME.turn % 2
@@ -592,15 +613,7 @@ function placeCamel (ev) {
 	
 }
 
-function play () {
-	if (GAME.turn > 10) {
-		placeCamel()
-	} else {
-		placeRider()
-	}
-}
-
-function placeRider (ev) {
+function placeRider () {
 
 		var tile = UI.selectedTile;
 		var act_pl = GAME.turn % 2;
@@ -668,11 +681,6 @@ function getColor () {
 	return sel.options[sel.selectedIndex].value;
 }
 
-// function getPlayer () {
-// 	var sel = document.getElementById("player");
-// 	return sel.options[sel.selectedIndex].value;
-// }
-
 function nextTurn () {
 	if (GAME.camels_played === 0) {
 
@@ -683,12 +691,6 @@ function nextTurn () {
 		GAME.camels_played = 0;
 		writeLog();
 	}
-}
-
-function writeLog () {
-	var log = document.querySelector('textarea').textContent;
-	var line = 'Turn number: ' + GAME.turn + '\n';
-	document.querySelector('textarea').textContent = log + line;
 }
 
 document.body.onload = prepareBoard;
@@ -702,114 +704,17 @@ function prepareBoard () {
 	drawBoardState();
 }
 
+function buttonHandler (ev) {
+	if (ev.target.type == 'submit' && UI.returnSelected != null) {
+		console.log(ev.target.value);
+	}
+}
+
 function addListeners () {
 	document.querySelector('canvas').addEventListener('click', testClick);
-	document.querySelector('button').addEventListener('click', play);
-	document.querySelector('button + button').addEventListener('click', placeRider);
-	document.querySelector('button + button + button').addEventListener('click', GAME.board.clearBoard.bind(GAME.board));
-	document.querySelector('button + button + button + button').addEventListener('click', nextTurn);
-	document.querySelector('input[name=inputbox]').addEventListener('keydown', textHandler);
-}
-	
-
-function textHandler (ev) {
-	console.log(ev.target.value);
-	if (ev.keyCode === 13) {
-		parseMove(ev.target.value);
-	}
-}
-
-
-
-function parseMove (str) {
-	//Takes a 3 character string and parses the relative move
-	var result = [];
-	if (str.length === 3) {
-		var color = str.charAt(0)
-		var column = str.charAt(1)
-		var row = parseInt(str.charAt(2));
-		console.log(color, column, row);
-		debugger;
-		switch (color) {
-			case 'M':
-				result.push('Mint')
-				break;
-			case 'L':
-				result.push('Lime')
-				break;
-			case 'G':
-				result.push('Grape')
-				break;
-			case 'E':
-				result.push('Lemon')
-				break;
-			case 'O':
-				result.push('Orange')
-				break;
-			default :
-				throw ("unrecognized character")
-				break;
-		}
-		switch (column) {
-			case 'a':
-				result.push(0)
-				break;
-			case 'b':
-				result.push(1)
-				break;
-			case 'c':
-				result.push(2)
-				break;
-			case 'd':
-				result.push(3)
-				break;
-			case 'e':
-				result.push(4)
-				break;
-			case 'f':
-				result.push(5)
-				break;
-			case 'g':
-				result.push(6)
-				break;
-			case 'h':
-				result.push(7)
-				break;
-			case 'i':
-				result.push(8)
-				break;
-			case 'j':
-				result.push(9)
-				break;
-			case 'k':
-				result.push(10)
-				break;
-			case 'l':
-				result.push(11)
-				break;
-			case 'm':
-				result.push(12)
-				break;
-			case 'n':
-				result.push(13)
-				break;
-			case 'o':
-				result.push(14)
-				break;
-			case 'p':
-				result.push(15)
-				break;
-			case 'q':
-				result.push(16)
-				break;
-			case 'r':
-				result.push(17)
-				break;
-			default :
-				throw ("unrecognized character")
-		}
-	result.push(row);
-	console.log(result);
-	}
-	
+	document.querySelector('div#color').addEventListener('click', buttonHandler);
+	// document.querySelector('div#colors button + button').addEventListener('click', placeRider);
+	// document.querySelector('div#colors button + button + button').addEventListener('click', GAME.board.clearBoard.bind(GAME.board));
+	// document.querySelector('div#colors button + button + button + button').addEventListener('click', nextTurn);
+	// document.querySelector('input[name=inputbox]').addEventListener('keydown', textHandler);
 }
