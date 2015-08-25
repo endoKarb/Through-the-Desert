@@ -103,6 +103,10 @@ var FLAGS = {
 var TILESIZE = 35;
 var BOARD = new Board(18, 13);
 
+var UI = {
+	'selectedTile': null
+}
+
 
 
 // #########################################################################
@@ -185,12 +189,16 @@ function setWaterholes (arr) {
 	}
 }
 
-function prepareMap () {
+function prepareBoard () {
 	// BOARD.printBoard();
 	setImpassable();
 	var splice = setOasis()[0];
 	setWaterholes(splice);
 	drawBoardState();
+
+	document.querySelector('button').addEventListener('click', playPiece);
+	document.querySelector('button + button').addEventListener('click', removePiece);
+
 	// draw_impassable('#333');
 	// draw_oasis('#4F4');
 	// draw_waterholes();
@@ -203,6 +211,7 @@ function Tile (arr) {
 	this.impassable = false;
 	this.oasis = false;
 	this.waterhole = false;
+	this.piece = false;
 	
 	var coor = arr;
 	var x = arr[0] * TILESIZE * 1.75 + TILESIZE;
@@ -334,6 +343,9 @@ function drawBoardState () {
 			if (tile.selected === true) {
 				drawEmptyHex(x, y, circrad, '#FA8');
 			}
+			if (tile.piece === true) {
+				drawPiece(x, y, circrad, '#F22');
+			}
 		};
 	};
 }
@@ -364,35 +376,55 @@ function drawEmptyHex (x, y, cirumradius, fill) {
 
 	var canvas = document.getElementById('board');
 
-	if (canvas.getContext) {
-		var ctx = canvas.getContext('2d');
-		var path = new Path2D();
+	var ctx = canvas.getContext('2d');
+	var path = new Path2D();
 
-		var center_x = x;
-    	var center_y = y;
+	var center_x = x;
+	var center_y = y;
 
-    	path.moveTo((Math.cos(Math.PI * 1 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 1 / 3) * cirumradius) + center_y));
-    	path.lineTo((Math.cos(Math.PI * 2 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 2 / 3) * cirumradius) + center_y));
-    	path.lineTo((Math.cos(Math.PI * 3 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 3 / 3) * cirumradius) + center_y));
-    	path.lineTo((Math.cos(Math.PI * 4 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 4 / 3) * cirumradius) + center_y));
-    	path.lineTo((Math.cos(Math.PI * 5 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 5 / 3) * cirumradius) + center_y));
-    	path.lineTo((Math.cos(Math.PI * 6 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 6 / 3) * cirumradius) + center_y));
-    	path.closePath();
+	path.moveTo((Math.cos(Math.PI * 1 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 1 / 3) * cirumradius) + center_y));
+	path.lineTo((Math.cos(Math.PI * 2 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 2 / 3) * cirumradius) + center_y));
+	path.lineTo((Math.cos(Math.PI * 3 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 3 / 3) * cirumradius) + center_y));
+	path.lineTo((Math.cos(Math.PI * 4 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 4 / 3) * cirumradius) + center_y));
+	path.lineTo((Math.cos(Math.PI * 5 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 5 / 3) * cirumradius) + center_y));
+	path.lineTo((Math.cos(Math.PI * 6 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 6 / 3) * cirumradius) + center_y));
+	path.closePath();
 
-    	cirumradius = cirumradius * 1.275
+	cirumradius = cirumradius * 1.275
 
-    	path.moveTo((Math.cos(Math.PI * 7 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 7 / 3) * cirumradius) + center_y));
-    	path.lineTo((Math.cos(Math.PI * 6 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 6 / 3) * cirumradius) + center_y));
-    	path.lineTo((Math.cos(Math.PI * 5 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 5 / 3) * cirumradius) + center_y));
-    	path.lineTo((Math.cos(Math.PI * 4 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 4 / 3) * cirumradius) + center_y));
-    	path.lineTo((Math.cos(Math.PI * 3 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 3 / 3) * cirumradius) + center_y));
-    	path.lineTo((Math.cos(Math.PI * 2 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 2 / 3) * cirumradius) + center_y));
-    	path.closePath();
+	path.moveTo((Math.cos(Math.PI * 7 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 7 / 3) * cirumradius) + center_y));
+	path.lineTo((Math.cos(Math.PI * 6 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 6 / 3) * cirumradius) + center_y));
+	path.lineTo((Math.cos(Math.PI * 5 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 5 / 3) * cirumradius) + center_y));
+	path.lineTo((Math.cos(Math.PI * 4 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 4 / 3) * cirumradius) + center_y));
+	path.lineTo((Math.cos(Math.PI * 3 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 3 / 3) * cirumradius) + center_y));
+	path.lineTo((Math.cos(Math.PI * 2 / 3) * cirumradius) + center_x, ((Math.sin(Math.PI * 2 / 3) * cirumradius) + center_y));
+	path.closePath();
 
-    	ctx.stroke(path);
-    	ctx.fillStyle = fill;
-    	ctx.fill(path);
-	}
+	ctx.stroke(path);
+	ctx.fillStyle = fill;
+	ctx.fill(path);
+}
+
+function drawPiece (x, y, cirumradius, fill) {
+
+	var canvas = document.getElementById('board');
+	var ctx = canvas.getContext('2d');
+	var path = new Path2D();
+
+	var center_x = x;
+	var center_y = y;
+
+	cirumradius = cirumradius * 0.75
+
+	path.moveTo((Math.cos(Math.PI * 1 / 4) * cirumradius) + center_x, ((Math.sin(Math.PI * 1 / 4) * cirumradius) + center_y));
+	path.lineTo((Math.cos(Math.PI * 3 / 4) * cirumradius) + center_x, ((Math.sin(Math.PI * 3 / 4) * cirumradius) + center_y));
+	path.lineTo((Math.cos(Math.PI * 5 / 4) * cirumradius) + center_x, ((Math.sin(Math.PI * 5 / 4) * cirumradius) + center_y));
+	path.lineTo((Math.cos(Math.PI * 7 / 4) * cirumradius) + center_x, ((Math.sin(Math.PI * 7 / 4) * cirumradius) + center_y));
+
+	ctx.stroke(path);
+	ctx.fillStyle = fill;
+	ctx.fill(path);
+
 }
 
 // function draw_hexmap (width, height, tilesize, fill) {
@@ -577,18 +609,39 @@ function PITAGORA (arr, arr2) {
 
 
 function testClick (ev) {
+
 	console.log('clickCoor', ev.layerX, ev.layerY);
+
 	var coor = [ev.layerX, ev.layerY];
 	var tile = closestTile(coor);
+
 	if (tile[2] === true) {
+
 		BOARD.resetClicked();
+
 		BOARD.board[tile[0]][tile[1]].selected = true;
+		UI.selectedTile = BOARD.board[tile[0]][tile[1]];
+
 		console.log('Tile', BOARD.board[tile[0]][tile[1]].center[2], BOARD.board[tile[0]][tile[1]].center[3], 'selected.');
+
 		drawBoardState();
+
 	} else {
 		console.log("Not a tile");
 	}
-	// return [ev.layerX, ev.layerY];
 }
+
+function playPiece (ev) {
+	console.log('Piece Played!');
+	UI.selectedTile.piece = true;
+	drawBoardState();
+}
+
+function removePiece (ev) {
+	console.log('Piece Removed');
+	UI.selectedTile.piece = false;
+	drawBoardState();
+}
+
+document.body.onload = prepareBoard;
 document.querySelector('canvas').addEventListener('click', testClick);
-document.body.onload = prepareMap;
