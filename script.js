@@ -966,10 +966,13 @@ function addFrontierRider (tile) {
 	var frontier = GAME.board.getAdjacent(tile.coord);
 
 	for (var i = 0; frontier.length > 0; i = i) {
-		
-		if (frontier[i].visited[flag] === true || frontier[i].impassable === true || frontier[i].camel != false) {
-			
-			
+
+		if ((frontier[i].visited[flag] === true) ||
+            (frontier[i].impassable === true) ||
+            ((frontier[i].camel != false) && (frontier[i].camel.owner !== tile.camel.owner)) ||
+            ((frontier[i].camel != false) && (frontier[i].camel.owner === tile.camel.owner) && (frontier[i].camel.color !== tile.camel.color))
+            ) {
+
 			frontier.splice(i, 1);
 
 		} else {
