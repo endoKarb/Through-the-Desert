@@ -96,6 +96,13 @@ var GAME = {
 	'riders_placed': [[],[]],
 	'points': [0,0],
 	'rules': true,
+	'stash': {
+		'Mint': 24,
+		'Lime': 24,
+		'Grape': 24,
+		'Lemon': 24,
+		'Orange': 24
+	},
 	'currentTurn': function () {
 		if (this.turns.length < 11) {
 			return this.turns.length;
@@ -116,14 +123,6 @@ var GAME = {
 		}
 	}
 };
-
-var STASH = {
-	'Mint': 24,
-	'Lime': 24,
-	'Grape': 24,
-	'Lemon': 24,
-	'Orange': 24
-}
 
 var UI = {
 	'selectedTile': null,
@@ -637,6 +636,12 @@ function updateUI () {
 	var black_points = document.querySelector('div .black.points');
 	var buttons = document.querySelector('div#color');
 
+	buttons.children[0].children[0].textContent = GAME.stash['Mint'];
+	buttons.children[1].children[0].textContent = GAME.stash['Lime'];
+	buttons.children[2].children[0].textContent = GAME.stash['Grape'];
+	buttons.children[3].children[0].textContent = GAME.stash['Lemon'];
+	buttons.children[4].children[0].textContent = GAME.stash['Orange'];
+
 	if (GAME.activePlayer() === 0) {
 		player1.style.borderColor = 'red';
 		player2.style.borderColor = 'white';
@@ -649,13 +654,16 @@ function updateUI () {
 		for (var i = 0; i < buttons.children.length; i++) {
 			if (GAME.riderWasPlayed(buttons.children[i].value) === true) {
 				buttons.children[i].style.backgroundColor = 'black';
+				buttons.children[i].disabled = true;
 			} else {
 				buttons.children[i].style.backgroundColor = colors[buttons.children[i].value];
+				buttons.children[i].disabled = false;
 			}
 		}
 	} else {
 		for (var i = 0; i < buttons.children.length; i++) {
 			buttons.children[i].style.backgroundColor = colors[buttons.children[i].value];
+			buttons.children[i].disabled = false;
 		}
 	}
 
@@ -719,7 +727,7 @@ function placeCamel (color) {
 			var coord = [UI.selectedTile.coord[0], UI.selectedTile.coord[1]]
 			tile.camel = new Camel(act_pl, color, false);
 			console.log(tile.camel);
-			STASH[color]--
+			GAME.stash[color]--
 			GAME.turns.push(new Turn(act_pl, color, coord));
 
 			resetVisited();
@@ -728,7 +736,7 @@ function placeCamel (color) {
 			setFlags();
 
 			console.log('Camel placed!', UI.selectedTile);
-			console.log(color + ' left ' + STASH[color]);
+			console.log(color + ' left ' + GAME.stash[color]);
 
 		} else {
 
@@ -749,16 +757,16 @@ function placeRider (color) {
 
 			var coord = [UI.selectedTile.coord[0], UI.selectedTile.coord[1]]
 			tile.camel = new Camel(act_pl, color, true);
-			STASH[color]--
+			GAME.stash[color]--
 			GAME.turns.push(new Turn(act_pl, color, coord));
 			GAME.riders_placed[act_pl].push(color);
 
 			drawBoardState();
 
 			console.log('Rider placed!', UI.selectedTile)
-			console.log(color + ' left ' + STASH[color])
+			console.log(color + ' left ' + GAME.stash[color])
 
-			if (STASH[color] === 0) {
+			if (GAME.stash[color] === 0) {
 				window.alert('GAME OVER!');
 			}
 
