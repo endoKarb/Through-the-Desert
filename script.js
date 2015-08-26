@@ -723,9 +723,9 @@ function placeCamel (color) {
 			GAME.turns.push(new Turn(act_pl, color, coord));
 
 			resetVisited();
-			setFlags();
-
+			
 			drawBoardState();
+			setFlags();
 
 			console.log('Camel placed!', UI.selectedTile);
 			console.log(color + ' left ' + STASH[color]);
@@ -786,6 +786,9 @@ function camelLegality (color) {
 		return false
 	} else if (enemyColorExists(color, adj_til) === true) {
 		console.log('Can\'t play next to enemy of same color');
+		return false
+	} else if (GAME.board.checkTerritory(UI.selectedTile) != null) {
+		console.log('Can\'t play in a territory');
 		return false
 	}
 }
@@ -921,6 +924,7 @@ function addListeners () {
 // }
 
 function resetVisited () {
+	// debugger;
 	var board = GAME.board.board;
 	for (var i = 0; i < board.length; i++) {
 		for (var j = 0; j < board[i].length; j++) {
@@ -962,8 +966,9 @@ function addFrontierRider (tile) {
 	// debugger;
 	var frontier = GAME.board.getAdjacent(tile.coord);
 	for (var i = 0; frontier.length > 0; i = i) {
-		debugger;
-		if (frontier[i].visited[flag] === true || frontier[i].impassable === true || frontier[i].camel != false && frontier[i].camel.color === rider[0] && frontier[i].camel.owner === rider[1]) {
+		
+		if (frontier[i].visited[flag] === true || frontier[i].impassable === true || frontier[i].camel != false) {
+			
 			
 			frontier.splice(i, 1);
 
