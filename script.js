@@ -113,7 +113,7 @@ var GAME = {
 				console.log('was played');
 				return true;
 			}
-		};
+		}
 	}
 };
 
@@ -147,7 +147,7 @@ var UI = {
 Board.prototype.setImpassable = function () {
 	for (var i = 0; i < BOARD.impassableTiles.length; i++) {
 		GAME.board.getTile(BOARD.impassableTiles[i]).impassable = true;
-	};
+	}
 }
 
 Board.prototype.setOasis = function () {
@@ -157,7 +157,7 @@ Board.prototype.setOasis = function () {
 	var splice = loc.splice(rnd, 1);
 	for (var i = 0; i < loc.length; i++) {
 		GAME.board.getTile(loc[i]).oasis = true;
-	};
+	}
 	return splice;
 }
 
@@ -177,26 +177,26 @@ Board.prototype.setWaterholes = function (arr) {
 Board.prototype.getRiders = function () {
 	//Returns a list of riders and their owner
 	var list = [];
-		for (var i = 0; i < this.board.length; i++) {
-			for (var j = 0; j < this.board[i].length; j++) {
-				if (this.board[i][j].camel.rider === true) {
-					list.push(this.board[i][j].camel);
-				}
+	for (var i = 0; i < this.board.length; i++) {
+		for (var j = 0; j < this.board[i].length; j++) {
+			if (this.board[i][j].camel.rider === true) {
+				list.push(this.board[i][j].camel);
 			}
 		}
+	}
 	return list;
 }
 
 Board.prototype.getRiderTiles = function () {
 	//Returns a list of tiles with riders on them
 	var list = [];
-		for (var i = 0; i < this.board.length; i++) {
-			for (var j = 0; j < this.board[i].length; j++) {
-				if (this.board[i][j].camel.rider === true) {
-					list.push(this.board[i][j]);
-				}
+	for (var i = 0; i < this.board.length; i++) {
+		for (var j = 0; j < this.board[i].length; j++) {
+			if (this.board[i][j].camel.rider === true) {
+				list.push(this.board[i][j]);
 			}
 		}
+	}
 	return list;
 }
 
@@ -206,7 +206,7 @@ Board.prototype.checkTerritory = function (tile) {
 	for (var i = 0; i < tile.visited.length; i++) {
 		if (tile.visited[i] === true) {
 			visited.push([i])
-		};
+		}
 	}
 	if (visited.length === 1) {
 		return Math.floor(visited[0] / 5);
@@ -238,7 +238,7 @@ function Tile (arr) {
 	this.camel = false;
 	this.selected = false;
 	this.visited = [];
-	
+
 	var x = arr[0] * BOARD.tileSize * 1.75 + BOARD.tileSize;
 	if (arr[0] % 2 > 0) {
 		var y = arr[1] * BOARD.tileSize * 2 + BOARD.tileSize * 2;
@@ -251,7 +251,7 @@ function Tile (arr) {
 }
 
 function Board (width, height) {
-	
+
 	this.board = [];
 	this.width = width;
 	this.height = height;
@@ -261,9 +261,9 @@ function Board (width, height) {
 		for (var j = 0; j < height; j++) {
 			var coord = [i,j];
 			column.push(new Tile(coord));
-		};
+		}
 		this.board.push(column);
-	};
+	}
 
 	this.getTile = function (arr) {
 		// Takes an array of coordinates and returns the corresponding Tile object
@@ -309,8 +309,8 @@ function Board (width, height) {
 			} else {
 				adj_tiles.push(GAME.board.board[tiles_to_find[i][0]][tiles_to_find[i][1]])
 			}
-		};
-	return adj_tiles;
+		}
+        return adj_tiles;
 	}
 
 	this.getCoorList = function () {
@@ -318,8 +318,8 @@ function Board (width, height) {
 		for (var i = 0; i < this.board.length; i++) {
 			for (var j = 0; j < this.board[i].length; j++) {
 				list.push([this.board[i][j].center, this.board[i][j].coord]);
-			};
-		};
+			}
+		}
 		return list;
 	}
 
@@ -327,20 +327,20 @@ function Board (width, height) {
 		for (var i = 0; i < this.board.length; i++) {
 			for (var j = 0; j < this.board[i].length; j++) {
 				this.board[i][j].selected = false;
-			};
-		};
+			}
+		}
 	}
 
 	this.clearBoard = function () {
 		for (var i = 0; i < this.board.length; i++) {
 			for (var j = 0; j < this.board[i].length; j++) {
 				this.board[i][j].camel = false;
-			};
-		};
+			}
+		}
 		drawBoardState();
 	}
 
-	
+
 	this.colorRider = function (color) {
 		// Checks if current player has already placed a rider of that color
 		var riders = '';
@@ -351,9 +351,9 @@ function Board (width, height) {
 					// debugger;
 					riders = riders.concat(this.board[i][j].camel.color);
 				}
-			};
-		};
-		
+			}
+		}
+
 		return riders;
 	}
 }
@@ -371,7 +371,7 @@ function drawBoardState () {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	for (var i = 0; i < GAME.board.board.length; i++) {
 		for (var j = 0; j < GAME.board.board[i].length; j++) {
-			
+
 			var tile = GAME.board.board[i][j]
 			var circrad = BOARD.tileSize
 			var x = tile.coord[0] * circrad * 1.75 + circrad;
@@ -432,8 +432,8 @@ function drawBoardState () {
 				draw_hexagon(x, y, circrad, '#DA2');
 			}
 
-		};
-	};
+		}
+	}
 }
 
 function draw_hexagon (x, y, cirumradius, fill) {
@@ -644,7 +644,7 @@ function updateUI () {
 		player1.style.borderColor = 'white';
 		player2.style.borderColor = 'red';
 	}
-	
+
 	if (GAME.currentTurn() < 10) {
 		for (var i = 0; i < buttons.children.length; i++) {
 			if (GAME.riderWasPlayed(buttons.children[i].value) === true) {
@@ -714,7 +714,7 @@ function placeCamel (color) {
 			if (UI.selectedTile.waterhole > 0) {
 				GAME.points[act_pl] = GAME.points[act_pl] + UI.selectedTile.waterhole;
 				console.log ('POINTS: ' + GAME.points[act_pl])
-			};
+			}
 
 			var coord = [UI.selectedTile.coord[0], UI.selectedTile.coord[1]]
 			tile.camel = new Camel(act_pl, color, false);
@@ -723,23 +723,23 @@ function placeCamel (color) {
 			GAME.turns.push(new Turn(act_pl, color, coord));
 
 			resetVisited();
-			
+
 			drawBoardState();
 			setFlags();
 
 			console.log('Camel placed!', UI.selectedTile);
 			console.log(color + ' left ' + STASH[color]);
-			
+
 		} else {
-			
+
 			console.log('Illegal move')
 		}
-		
-	
+
+
 }
 
 function placeRider (color) {
-		
+
 		var tile = UI.selectedTile;
 		var act_pl = GAME.activePlayer();
 
@@ -760,13 +760,13 @@ function placeRider (color) {
 
 			if (STASH[color] === 0) {
 				window.alert('GAME OVER!');
-			};
-			
+			}
+
 		} else {
-			
+
 			console.log('Illegal move')
 		}
-	
+
 }
 
 function camelLegality (color) {
@@ -777,24 +777,24 @@ function camelLegality (color) {
 		return false;
 	} else if (UI.selectedTile.camel !=	 false) {
 		console.log('Tile already occupied');
-		return false
+		return false;
 	} else if (UI.selectedTile.impassable === true || UI.selectedTile.oasis === true) {
 		console.log('Can\'t play there');
-		return false
+		return false;
 	} else if (allyColorExists(color, adj_til) === false) {
 		console.log('Must play adjacent to same color');
-		return false
+		return false;
 	} else if (enemyColorExists(color, adj_til) === true) {
 		console.log('Can\'t play next to enemy of same color');
-		return false
+		return false;
 	} else if (GAME.board.checkTerritory(UI.selectedTile) != null) {
 		console.log('Can\'t play in a territory');
-		return false
+		return false;
 	}
 }
 
 function riderLegality (color) {
-	
+
 	var adj_til = GAME.board.getAdjacent(UI.selectedTile.coord);
 
 	if (GAME.turn > 10) {
@@ -802,22 +802,22 @@ function riderLegality (color) {
 		return false;
 	} else if (UI.selectedTile.camel !=	 false) {
 		console.log('Tile already occupied');
-		return false
+		return false;
 	} else if (UI.selectedTile.impassable === true || UI.selectedTile.oasis === true || UI.selectedTile.waterhole > 0) {
 		console.log('Can\'t play there');
-		return false
+		return false;
 	} else if (GAME.board.colorRider(color) === color) {
 		console.log('One rider per color');
-		return false
+		return false;
 	} else if (riderExists(adj_til) === true) {
 		console.log('Can\'t play adjacent other riders');
-		return false
+		return false;
 	} else if (oasisExists(adj_til) === true) {
 		console.log('Can\'t play near oasis');
-		return false
+		return false;
 	} else if (GAME.currentTurn() === 1 && GAME.turns[0].color === color) {
 		console.log('Can\'t play same color as opponent first turn');
-		return false
+		return false;
 	}
 }
 
@@ -827,7 +827,7 @@ function allyColorExists (color, tile_arr) {
 		if (tile_arr[i].camel.color === color && tile_arr[i].camel.owner === GAME.activePlayer()) {
 			return true;
 		}
-	};
+	}
 	return false;
 }
 
@@ -837,7 +837,7 @@ function enemyColorExists (color, tile_arr) {
 		if (tile_arr[i].camel.color === color && tile_arr[i].camel.owner != GAME.activePlayer()) {
 			return true;
 		}
-	};
+	}
 	return false;
 }
 
@@ -847,7 +847,7 @@ function riderExists (tile_arr) {
 		if (tile_arr[i].camel.rider === true) {
 			return true;
 		}
-	};
+	}
 	return false;
 }
 
@@ -857,14 +857,13 @@ function oasisExists (tile_arr) {
 		if (tile_arr[i].oasis === true) {
 			return true;
 		}
-	};
+	}
 	return false;
 }
 
 document.body.onload = prepareBoard;
 
 function prepareBoard () {
-	
 	addListeners();
 	GAME.board.setImpassable();
 	var splice = GAME.board.setOasis()[0];
@@ -896,9 +895,9 @@ function addListeners () {
 // 	var frontier = GAME.board.getAdjacent(coord);
 // 	debugger;
 // 	for (var i = 0; frontier.length > 0; i = i) {
-		
+
 // 		if (frontier[i].visited === true || frontier[i].impassable === true || frontier[i].camel != false) {
-			
+
 // 			frontier.splice(i, 1);
 
 // 		} else {
@@ -907,7 +906,7 @@ function addListeners () {
 // 			var new_neigh = GAME.board.getAdjacent(frontier[i].coord);
 
 // 			for (var j = 0; j < new_neigh.length; j++) {
-				
+
 // 				if (new_neigh[j].visited === true) {
 
 // 				} else {
@@ -929,28 +928,28 @@ function resetVisited () {
 	for (var i = 0; i < board.length; i++) {
 		for (var j = 0; j < board[i].length; j++) {
 			board[i][j].visited = [];
-		};
-	};
+		}
+	}
 }
 
 function getVisitedFlag (rider) {
 	var index = 0;
 	switch (rider[0]){
 		case 'Mint':
-			index = 0;
-		break;
+		    index = 0;
+		    break;
 		case 'Lime':
-			index = 1;
-		break;
+		    index = 1;
+		    break;
 		case 'Grape':
-			index = 2;
-		break;
+		    index = 2;
+		    break;
 		case 'Lemon':
-			index = 3;
-		break;
+		    index = 3;
+		    break;
 		case 'Orange':
-			index = 4;
-		break;
+		    index = 4;
+		    break;
 	}
 	if (rider[1] === 1) {
 		index = index + 5;
@@ -963,8 +962,9 @@ function addFrontierRider (tile) {
 	var rider = [tile.camel.color, tile.camel.owner];
 	var flag = getVisitedFlag(rider);
 	var result = [];
-	// debugger;
+
 	var frontier = GAME.board.getAdjacent(tile.coord);
+
 	for (var i = 0; frontier.length > 0; i = i) {
 		
 		if (frontier[i].visited[flag] === true || frontier[i].impassable === true || frontier[i].camel != false) {
@@ -978,7 +978,7 @@ function addFrontierRider (tile) {
 			var new_neigh = GAME.board.getAdjacent(frontier[i].coord);
 
 			for (var j = 0; j < new_neigh.length; j++) {
-				
+
 				if (new_neigh[j].visited[flag] === true) {
 
 				} else {
@@ -988,7 +988,7 @@ function addFrontierRider (tile) {
 
 			result.push(frontier.splice(i, 1)[0]);
 		}
-	};
+	}
 	console.log(result);
 }
 
@@ -996,5 +996,5 @@ function setFlags () {
 	var riders = GAME.board.getRiderTiles();
 	for (var i = 0; i < riders.length; i++) {
 		addFrontierRider(riders[i]);
-	};
+	}
 }
