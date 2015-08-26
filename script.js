@@ -200,6 +200,21 @@ Board.prototype.getRiderTiles = function () {
 	return list;
 }
 
+Board.prototype.checkTerritory = function (tile) {
+	//Checks if a tile is a territory, and returns the player it belongs to
+	var visited = [];
+	for (var i = 0; i < tile.visited.length; i++) {
+		if (tile.visited[i] === true) {
+			visited.push([i])
+		};
+	}
+	if (visited.length === 1) {
+		return Math.floor(visited[0] / 5);
+	} else {
+		return null;
+	}
+}
+
 
 // CREATORS
 
