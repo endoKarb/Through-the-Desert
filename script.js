@@ -174,6 +174,19 @@ Board.prototype.setWaterholes = function (arr) {
 	}
 }
 
+Board.prototype.getRiders = function () {
+	//Returns a list of riders and their owner
+	var list = [];
+		for (var i = 0; i < this.board.length; i++) {
+			for (var j = 0; j < this.board[i].length; j++) {
+				if (this.board[i][j].camel.rider === true) {
+					list.push(this.board[i][j].camel);
+				}
+			}
+		}
+	return list;
+}
+
 
 // CREATORS
 
@@ -385,6 +398,11 @@ function drawBoardState () {
 			if (tile.selected === true) {
 				drawEmptyHex(x, y, circrad, '#FA8');
 			}
+
+			if (tile.visited === true) {
+				draw_hexagon(x, y, circrad, '#DA2');
+			}
+
 		};
 	};
 }
@@ -843,8 +861,8 @@ function addFrontier (coord) {
 	var frontier = GAME.board.getAdjacent(coord);
 	debugger;
 	for (var i = 0; frontier.length > 0; i = i) {
-
-		if (frontier[i].visited === true || frontier[i].impassable === true) {
+		
+		if (frontier[i].visited === true || frontier[i].impassable === true || frontier[i].camel != false) {
 			
 			frontier.splice(i, 1);
 
@@ -866,7 +884,7 @@ function addFrontier (coord) {
 		}
 	};
 
-	resetVisited();
+	/*resetVisited();*/
 	console.log(result);
 }
 
