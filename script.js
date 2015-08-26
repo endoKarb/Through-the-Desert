@@ -944,11 +944,11 @@ function addFrontierRider (tile) {
 	var rider = [tile.camel.color, tile.camel.owner];
 	var flag = getVisitedFlag(rider);
 	var result = [];
-	debugger;
+	// debugger;
 	var frontier = GAME.board.getAdjacent(tile.coord);
 	for (var i = 0; frontier.length > 0; i = i) {
-		
-		if (frontier[i].visited[flag] === true || frontier[i].impassable === true || frontier[i].camel != false) {
+		debugger;
+		if (frontier[i].visited[flag] === true || frontier[i].impassable === true || frontier[i].camel != false && frontier[i].camel.color === rider[0] && frontier[i].camel.owner === rider[1]) {
 			
 			frontier.splice(i, 1);
 
