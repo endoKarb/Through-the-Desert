@@ -187,12 +187,25 @@ Board.prototype.getRiders = function () {
 	return list;
 }
 
+Board.prototype.getRiderTiles = function () {
+	//Returns a list of riders and their owner
+	var list = [];
+		for (var i = 0; i < this.board.length; i++) {
+			for (var j = 0; j < this.board[i].length; j++) {
+				if (this.board[i][j].camel.rider === true) {
+					list.push(this.board[i][j]);
+				}
+			}
+		}
+	return list;
+}
+
 
 // CREATORS
 
-function Turn (player, color, coor) {
+function Turn (player, color, coord) {
 	this.player = player;
-	this.move = [coor[0], coor[1]];
+	this.move = [coord[0], coord[1]];
 	this.color = color;
 }
 
@@ -209,6 +222,7 @@ function Tile (arr) {
 	this.waterhole = false;
 	this.camel = false;
 	this.selected = false;
+	this.visited = [];
 	
 	var x = arr[0] * BOARD.tileSize * 1.75 + BOARD.tileSize;
 	if (arr[0] % 2 > 0) {
@@ -218,7 +232,7 @@ function Tile (arr) {
 	}
 
 	this.center = [x, y];
-	this.coor = [arr[0], arr[1]]
+	this.coord = [arr[0], arr[1]]
 }
 
 function Board (width, height) {
@@ -230,8 +244,8 @@ function Board (width, height) {
 	for (var i = 0; i < width; i++) {
 		var column = [];
 		for (var j = 0; j < height; j++) {
-			var coor = [i,j];
-			column.push(new Tile(coor));
+			var coord = [i,j];
+			column.push(new Tile(coord));
 		};
 		this.board.push(column);
 	};
@@ -288,7 +302,7 @@ function Board (width, height) {
 		var list = [];
 		for (var i = 0; i < this.board.length; i++) {
 			for (var j = 0; j < this.board[i].length; j++) {
-				list.push([this.board[i][j].center, this.board[i][j].coor]);
+				list.push([this.board[i][j].center, this.board[i][j].coord]);
 			};
 		};
 		return list;
@@ -345,8 +359,8 @@ function drawBoardState () {
 			
 			var tile = GAME.board.board[i][j]
 			var circrad = BOARD.tileSize
-			var x = tile.coor[0] * circrad * 1.75 + circrad;
-			var y = tile.coor[1] * circrad * 2 + circrad * ((i % 2 > 0) ? 2 : 1);
+			var x = tile.coord[0] * circrad * 1.75 + circrad;
+			var y = tile.coord[1] * circrad * 2 + circrad * ((i % 2 > 0) ? 2 : 1);
 
 			 if (tile.camel != false) {
 				var color = '#FFF'
@@ -506,8 +520,8 @@ function drawRider (x, y, cirumradius, fill) {
 }
 
 function drawNumber (tile) {
-	var x = tile.coor[0]
-	var y = tile.coor[1]
+	var x = tile.coord[0]
+	var y = tile.coord[1]
 
 	var circumradius = BOARD.tileSize * 0.6;
 
@@ -550,11 +564,11 @@ function isTile (arr, arr1) {
 function closestTile (arr) {
 	//Finds the closest tile on the board given an array containing two coordinates. Returns their board coordinates
 	var distances = [];
-	var coor_list = GAME.board.getCoorList();
-	for (var i = 0; i < coor_list.length; i++) {
-		distances.push(PITAGORA(arr, coor_list[i][0]));
+	var coord_list = GAME.board.getCoorList();
+	for (var i = 0; i < coord_list.length; i++) {
+		distances.push(PITAGORA(arr, coord_list[i][0]));
 	};
-	var closest = coor_list[findSmallest(distances)];
+	var closest = coord_list[findSmallest(distances)];
 	var is_tile = isTile(arr, [closest[0][0], closest[0][1]]);
 	// console.log([closest[2], closest[3], is_tile]);
 	return ([closest[1][0], closest[1][1], is_tile]);
@@ -648,7 +662,7 @@ function testClick (ev) {
 		GAME.board.board[tile[0]][tile[1]].selected = true;
 		UI.selectedTile = GAME.board.board[tile[0]][tile[1]];
 
-		console.log('Tile', GAME.board.board[tile[0]][tile[1]].coor[0], GAME.board.board[tile[0]][tile[1]].coor[1], 'selected.');
+		console.log('Tile', GAME.board.board[tile[0]][tile[1]].coord[0], GAME.board.board[tile[0]][tile[1]].coord[1], 'selected.');
 
 		drawBoardState();
 
@@ -687,11 +701,11 @@ function placeCamel (color) {
 				console.log ('POINTS: ' + GAME.points[act_pl])
 			};
 
-			var coor = [UI.selectedTile.coor[0], UI.selectedTile.coor[1]]
+			var coord = [UI.selectedTile.coord[0], UI.selectedTile.coord[1]]
 			tile.camel = new Camel(act_pl, color, false);
 			console.log(tile.camel);
 			STASH[color]--
-			GAME.turns.push(new Turn(act_pl, color, coor));
+			GAME.turns.push(new Turn(act_pl, color, coord));
 
 			drawBoardState();
 
@@ -715,10 +729,10 @@ function placeRider (color) {
 
 		if (legal != false) {
 
-			var coor = [UI.selectedTile.coor[0], UI.selectedTile.coor[1]]
+			var coord = [UI.selectedTile.coord[0], UI.selectedTile.coord[1]]
 			tile.camel = new Camel(act_pl, color, true);
 			STASH[color]--
-			GAME.turns.push(new Turn(act_pl, color, coor));
+			GAME.turns.push(new Turn(act_pl, color, coord));
 			GAME.riders_placed[act_pl].push(color);
 
 			drawBoardState();
@@ -738,7 +752,7 @@ function placeRider (color) {
 }
 
 function camelLegality (color) {
-	var adj_til = GAME.board.getAdjacent(UI.selectedTile.coor);
+	var adj_til = GAME.board.getAdjacent(UI.selectedTile.coord);
 
 	if (GAME.turn < 10) {
 		console.log('No camels before turn 10');
@@ -760,7 +774,7 @@ function camelLegality (color) {
 
 function riderLegality (color) {
 	
-	var adj_til = GAME.board.getAdjacent(UI.selectedTile.coor);
+	var adj_til = GAME.board.getAdjacent(UI.selectedTile.coord);
 
 	if (GAME.turn > 10) {
 		console.log('No riders after turn 10');
@@ -869,7 +883,7 @@ function addFrontier (coord) {
 		} else {
 
 			frontier[i].visited = true;
-			var new_neigh = GAME.board.getAdjacent(frontier[i].coor);
+			var new_neigh = GAME.board.getAdjacent(frontier[i].coord);
 
 			for (var j = 0; j < new_neigh.length; j++) {
 				
@@ -895,4 +909,64 @@ function resetVisited () {
 			board[i][j].visited = false;
 		};
 	};
+}
+
+function getVisitedFlag (rider) {
+	var index = 0;
+	switch (rider[0]){
+		case 'Mint':
+			index = 0;
+		break;
+		case 'Lime':
+			index = 1;
+		break;
+		case 'Grape':
+			index = 2;
+		break;
+		case 'Lemon':
+			index = 3;
+		break;
+		case 'Orange':
+			index = 4;
+		break;
+	}
+	if (rider[1] === 1) {
+		index = index + 5;
+	}
+	return index;
+}
+
+function addFrontierRider (tile) {
+
+	var rider = [tile.camel.color, tile.camel.owner];
+	var flag = getVisitedFlag(rider);
+	var result = [];
+	debugger;
+	var frontier = GAME.board.getAdjacent(tile.coord);
+	for (var i = 0; frontier.length > 0; i = i) {
+		
+		if (frontier[i].visited[flag] === true || frontier[i].impassable === true || frontier[i].camel != false) {
+			
+			frontier.splice(i, 1);
+
+		} else {
+
+			frontier[i].visited[flag] = true;
+			var new_neigh = GAME.board.getAdjacent(frontier[i].coord);
+
+			for (var j = 0; j < new_neigh.length; j++) {
+				
+				if (new_neigh[j].visited[flag] === true) {
+
+				} else {
+					frontier.push(new_neigh[j]);
+				}
+			}
+
+			result.push(frontier.splice(i, 1)[0]);
+		}
+	};
+
+	/*resetVisited();*/
+	console.log(result);
 }
