@@ -702,12 +702,14 @@ function testClick (ev) {
 
 
 function play (color) {
-	if (GAME.currentTurn() >= 10) {
-		placeCamel(color);
-	} else {
-		placeRider(color);
+	if (GAME.finished != true) {
+		if (GAME.currentTurn() >= 10) {
+			placeCamel(color);
+		} else {
+			placeRider(color);
+		}
+		updateUI();
 	}
-	updateUI();
 }
 
 function placeCamel (color) {
@@ -736,7 +738,11 @@ function placeCamel (color) {
 			setFlags();
 
 			console.log('Camel placed!', UI.selectedTile);
-			console.log(color + ' left ' + GAME.stash[color]);
+
+			if (GAME.stash[color] < 1) {
+				window.alert('GAME OVER!');
+				GAME.finished = true;
+			}
 
 		} else {
 
@@ -764,11 +770,6 @@ function placeRider (color) {
 			drawBoardState();
 
 			console.log('Rider placed!', UI.selectedTile)
-			console.log(color + ' left ' + GAME.stash[color])
-
-			if (GAME.stash[color] === 0) {
-				window.alert('GAME OVER!');
-			}
 
 		} else {
 
