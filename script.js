@@ -188,7 +188,7 @@ Board.prototype.getRiders = function () {
 }
 
 Board.prototype.getRiderTiles = function () {
-	//Returns a list of riders and their owner
+	//Returns a list of tiles with riders on them
 	var list = [];
 		for (var i = 0; i < this.board.length; i++) {
 			for (var j = 0; j < this.board[i].length; j++) {
@@ -707,6 +707,9 @@ function placeCamel (color) {
 			STASH[color]--
 			GAME.turns.push(new Turn(act_pl, color, coord));
 
+			resetVisited();
+			setFlags();
+
 			drawBoardState();
 
 			console.log('Camel placed!', UI.selectedTile);
@@ -869,44 +872,44 @@ function addListeners () {
 ////////////////////////////////////////////////////////////////////////////////
 
 
-function addFrontier (coord) {
+// function addFrontier (coord) {
 
-	var result = [];
-	var frontier = GAME.board.getAdjacent(coord);
-	debugger;
-	for (var i = 0; frontier.length > 0; i = i) {
+// 	var result = [];
+// 	var frontier = GAME.board.getAdjacent(coord);
+// 	debugger;
+// 	for (var i = 0; frontier.length > 0; i = i) {
 		
-		if (frontier[i].visited === true || frontier[i].impassable === true || frontier[i].camel != false) {
+// 		if (frontier[i].visited === true || frontier[i].impassable === true || frontier[i].camel != false) {
 			
-			frontier.splice(i, 1);
+// 			frontier.splice(i, 1);
 
-		} else {
+// 		} else {
 
-			frontier[i].visited = true;
-			var new_neigh = GAME.board.getAdjacent(frontier[i].coord);
+// 			frontier[i].visited = true;
+// 			var new_neigh = GAME.board.getAdjacent(frontier[i].coord);
 
-			for (var j = 0; j < new_neigh.length; j++) {
+// 			for (var j = 0; j < new_neigh.length; j++) {
 				
-				if (new_neigh[j].visited === true) {
+// 				if (new_neigh[j].visited === true) {
 
-				} else {
-					frontier.push(new_neigh[j]);
-				}
-			}
+// 				} else {
+// 					frontier.push(new_neigh[j]);
+// 				}
+// 			}
 
-			result.push(frontier.splice(i, 1)[0]);
-		}
-	};
+// 			result.push(frontier.splice(i, 1)[0]);
+// 		}
+// 	};
 
-	/*resetVisited();*/
-	console.log(result);
-}
+// 	/*resetVisited();*/
+// 	console.log(result);
+// }
 
 function resetVisited () {
 	var board = GAME.board.board;
 	for (var i = 0; i < board.length; i++) {
 		for (var j = 0; j < board[i].length; j++) {
-			board[i][j].visited = false;
+			board[i][j].visited = [];
 		};
 	};
 }
@@ -966,7 +969,12 @@ function addFrontierRider (tile) {
 			result.push(frontier.splice(i, 1)[0]);
 		}
 	};
-
-	/*resetVisited();*/
 	console.log(result);
+}
+
+function setFlags () {
+	var riders = GAME.board.getRiderTiles();
+	for (var i = 0; i < riders.length; i++) {
+		addFrontierRider(riders[i]);
+	};
 }
