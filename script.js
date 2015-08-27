@@ -1002,20 +1002,21 @@ function addFrontierRider (tile) {
 
 	var frontier = GAME.board.getAdjacent(tile.coord);
 
-	for (var i = 0; frontier.length > 0; i = i) {
+	
+	while (frontier.length > 0) {
 
-		if ((frontier[i].visited[flag] === true) ||
-            (frontier[i].impassable === true) ||
-            ((frontier[i].camel != false) && (frontier[i].camel.owner !== tile.camel.owner)) ||
-            ((frontier[i].camel != false) && (frontier[i].camel.owner === tile.camel.owner) && (frontier[i].camel.color !== tile.camel.color))
+		if ((frontier[0].visited[flag] === true) ||
+            (frontier[0].impassable === true) ||
+            ((frontier[0].camel != false) && (frontier[0].camel.owner !== tile.camel.owner)) ||
+            ((frontier[0].camel != false) && (frontier[0].camel.owner === tile.camel.owner) && (frontier[0].camel.color !== tile.camel.color))
             ) {
 
-			frontier.splice(i, 1);
+			frontier.splice(0, 1);
 
 		} else {
 
-			frontier[i].visited[flag] = true;
-			var new_neigh = GAME.board.getAdjacent(frontier[i].coord);
+			frontier[0].visited[flag] = true;
+			var new_neigh = GAME.board.getAdjacent(frontier[0].coord);
 
 			for (var j = 0; j < new_neigh.length; j++) {
 
@@ -1026,7 +1027,7 @@ function addFrontierRider (tile) {
 				}
 			}
 
-			result.push(frontier.splice(i, 1)[0]);
+			result.push(frontier.splice(0, 1)[0]);
 		}
 	}
 	// console.log(result);
