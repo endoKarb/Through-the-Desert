@@ -203,7 +203,7 @@ Board.prototype.checkTerritory = function (tile) {
 	//Checks if a tile is a territory, and returns the player it belongs to
 	var visited = [];
 	for (var i = 0; i < tile.visited.length; i++) {
-		if (tile.visited[i] === true) {
+		if (tile.visited[i] === true && tile.camel == false) {
 			visited.push([i])
 		}
 	}
@@ -212,6 +212,19 @@ Board.prototype.checkTerritory = function (tile) {
 	} else {
 		return null;
 	}
+}
+
+Board.prototype.getTerritoryList = function () {
+	//Returns an array containing every tile which belongs to a territory
+	var territories = [];
+	for (var i = 0; i < this.board.length; i++) {
+		for (var j = 0; j < this.board[i].length; j++) {
+			if (this.checkTerritory(this.board[i][j]) != null) {
+				territories.push(this.board[i][j]);
+			};
+		};
+	}
+	return territories;
 }
 
 
@@ -520,7 +533,7 @@ function drawRider (x, y, cirumradius, fill) {
 
 	var center_x = x;
 	var center_y = y;
-	console.log (x, y);
+	// console.log (x, y);
 
 	// debugger;
 	ctx.beginPath();
@@ -699,6 +712,20 @@ function testClick (ev) {
 }
 
 
+function checkScore () {
+	var territories = GAME.board.getTerritoryList();
+	var act_pl = GAME.activePlayer();
+	console.log(act_pl);
+	for (var i = 0; i < territories.length; i++) {
+		if (territories[i].waterhole != false) {
+			GAME.points[act_pl] = GAME.points[act_pl] + territories[i].waterhole;
+			territories[i].waterhole = false;
+			console.log ('POINTS: ' + GAME.points[act_pl])
+		}
+	}
+	drawBoardState();
+}
+
 function play (color) {
 	if (GAME.finished != true) {
 		if (GAME.currentTurn() >= 10) {
@@ -727,14 +754,16 @@ function placeCamel (color) {
 
 			var coord = [UI.selectedTile.coord[0], UI.selectedTile.coord[1]]
 			tile.camel = new Camel(act_pl, color, false);
-			console.log(tile.camel);
+			// console.log(tile.camel);
 			GAME.stash[color]--
-			GAME.turns.push(new Turn(act_pl, color, coord));
 
 			resetVisited();
 
 			drawBoardState();
 			setFlags();
+			// debugger;
+			checkScore();
+			GAME.turns.push(new Turn(act_pl, color, coord));
 
 			console.log('Camel placed!', UI.selectedTile);
 
@@ -1000,7 +1029,7 @@ function addFrontierRider (tile) {
 			result.push(frontier.splice(i, 1)[0]);
 		}
 	}
-	console.log(result);
+	// console.log(result);
 }
 
 function setFlags () {
