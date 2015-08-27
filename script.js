@@ -726,6 +726,19 @@ function checkScore () {
 	drawBoardState();
 }
 
+
+function claimedOasis (tile, color) {
+	//Takes a oasis tile and a color and tells if that oasis tile has been already claimed by active player
+	var act_pl = GAME.activePlayer();
+	var adj = GAME.board.getAdjacent(tile.coord);
+	for (var i = 0; i < adj.length; i++) {
+		if (adj[i].camel.color === color && adj[i].camel.owner === act_pl) {
+			return true;
+		}
+	}
+	return false;
+}
+
 function play (color) {
 	if (GAME.finished != true) {
 		if (GAME.currentTurn() >= 10) {
@@ -741,6 +754,7 @@ function placeCamel (color) {
 
 		var tile = UI.selectedTile;
 		var act_pl = GAME.activePlayer();
+		var adj = GAME.board.getAdjacent(UI.selectedTile.coord);
 
 		var legal = (GAME.rules == true) ? camelLegality(color) : true;
 
@@ -753,8 +767,17 @@ function placeCamel (color) {
 			}
 
 			var coord = [UI.selectedTile.coord[0], UI.selectedTile.coord[1]]
+
+			var oasis = oasisExists(adj, color);
+			if (oasis !== false) {
+				if (claimedOasis(oasis, color) === false) {
+					GAME.points[act_pl] = GAME.points[act_pl] + 5;
+					console.log ('POINTS: ' + GAME.points[act_pl])
+				}
+			}
+
 			tile.camel = new Camel(act_pl, color, false);
-			// console.log(tile.camel);
+			
 			GAME.stash[color]--
 
 			resetVisited();
@@ -849,7 +872,7 @@ function riderLegality (color) {
 	} else if (riderExists(adj_til) === true) {
 		console.log('Can\'t play adjacent other riders');
 		return false;
-	} else if (oasisExists(adj_til) === true) {
+	} else if (oasisExists(adj_til) != false) {
 		console.log('Can\'t play near oasis');
 		return false;
 	} else if (GAME.currentTurn() === 1 && GAME.turns[0].color === color) {
@@ -892,7 +915,7 @@ function oasisExists (tile_arr) {
 	//Tells you if an oasis in the tiles specified in the "tile_arr"
 	for (var i = 0; i < tile_arr.length; i++) {
 		if (tile_arr[i].oasis === true) {
-			return true;
+			return tile_arr[i];
 		}
 	}
 	return false;
