@@ -699,8 +699,6 @@ function testClick (ev) {
 }
 
 
-
-
 function play (color) {
 	if (GAME.finished != true) {
 		if (GAME.currentTurn() >= 10) {
@@ -723,6 +721,7 @@ function placeCamel (color) {
 
 			if (UI.selectedTile.waterhole > 0) {
 				GAME.points[act_pl] = GAME.points[act_pl] + UI.selectedTile.waterhole;
+				UI.selectedTile.waterhole = false;
 				console.log ('POINTS: ' + GAME.points[act_pl])
 			}
 
