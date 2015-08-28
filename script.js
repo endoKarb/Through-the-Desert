@@ -725,6 +725,17 @@ function checkScore () {
 			territories[i].waterhole = false;
 			console.log ('POINTS: ' + GAME.points[act_pl])
 		}
+		var flag = null;
+		for (var j = 0; j < territories[i].visited.length; j++) {
+			if (territories[i].visited[j] === true) {
+				flag = j;
+			}
+		};
+		if (territories[i].oasis.exists != false && territories[i].oasis.scored[flag] === false) {
+			GAME.points[act_pl] = GAME.points[act_pl] + 5;
+			territories[i].oasis.scored[flag] = true;
+			console.log ('POINTS: ' + GAME.points[act_pl]);
+		}
 	}
 	drawBoardState();
 }
