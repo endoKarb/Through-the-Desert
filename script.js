@@ -155,7 +155,7 @@ Board.prototype.setOasis = function () {
 	var loc = BOARD.oasisTiles.slice(0);
 	var splice = loc.splice(rnd, 1);
 	for (var i = 0; i < loc.length; i++) {
-		GAME.board.getTile(loc[i]).oasis = true;
+		GAME.board.getTile(loc[i]).oasis.exists = true;
 	}
 	return splice;
 }
@@ -245,7 +245,10 @@ function Camel (owner, color, rider) {
 function Tile (arr) {
 
 	this.impassable = false;
-	this.oasis = false;
+	this.oasis = {
+		'exists': false,
+		'scored': []
+	}
 	this.waterhole = false;
 	this.camel = false;
 	this.selected = false;
@@ -430,7 +433,7 @@ function drawBoardState () {
 			} else if (tile.waterhole != false) {
 				draw_hexagon(x, y, circrad, '#36D');
 				drawNumber(tile);
-			} else if (tile.oasis === true) {
+			} else if (tile.oasis.exists === true) {
 				draw_hexagon(x, y, circrad, '#9D2');
 			} else {
 				draw_hexagon(x, y, circrad, '#AA8');
@@ -715,7 +718,7 @@ function testClick (ev) {
 function checkScore () {
 	var territories = GAME.board.getTerritoryList();
 	var act_pl = GAME.activePlayer();
-	console.log(act_pl);
+	// console.log(act_pl);
 	for (var i = 0; i < territories.length; i++) {
 		if (territories[i].waterhole != false) {
 			GAME.points[act_pl] = GAME.points[act_pl] + territories[i].waterhole;
@@ -724,19 +727,6 @@ function checkScore () {
 		}
 	}
 	drawBoardState();
-}
-
-
-function claimedOasis (tile, color) {
-	//Takes a oasis tile and a color and tells if that oasis tile has been already claimed by active player
-	var act_pl = GAME.activePlayer();
-	var adj = GAME.board.getAdjacent(tile.coord);
-	for (var i = 0; i < adj.length; i++) {
-		if (adj[i].camel.color === color && adj[i].camel.owner === act_pl) {
-			return true;
-		}
-	}
-	return false;
 }
 
 function play (color) {
@@ -767,12 +757,15 @@ function placeCamel (color) {
 			}
 
 			var coord = [UI.selectedTile.coord[0], UI.selectedTile.coord[1]]
-
-			var oasis = oasisExists(adj, color);
+			
+			var oasis = oasisExists(adj);
 			if (oasis !== false) {
-				if (claimedOasis(oasis, color) === false) {
+				debugger;
+				var rider = getVisitedFlag([color, act_pl]);
+				if (oasis.oasis.scored[rider] != true) {
+					oasis.oasis.scored[rider] = true;
 					GAME.points[act_pl] = GAME.points[act_pl] + 5;
-					console.log ('POINTS: ' + GAME.points[act_pl])
+					console.log ('POINTS: ' + GAME.points[act_pl]);
 				}
 			}
 
@@ -838,7 +831,7 @@ function camelLegality (color) {
 	} else if (UI.selectedTile.camel !=	 false) {
 		console.log('Tile already occupied');
 		return false;
-	} else if (UI.selectedTile.impassable === true || UI.selectedTile.oasis === true) {
+	} else if (UI.selectedTile.impassable === true || UI.selectedTile.oasis.exists === true) {
 		console.log('Can\'t play there');
 		return false;
 	} else if (allyColorExists(color, adj_til) === false) {
@@ -863,7 +856,7 @@ function riderLegality (color) {
 	} else if (UI.selectedTile.camel !=	 false) {
 		console.log('Tile already occupied');
 		return false;
-	} else if (UI.selectedTile.impassable === true || UI.selectedTile.oasis === true || UI.selectedTile.waterhole > 0) {
+	} else if (UI.selectedTile.impassable === true || UI.selectedTile.oasis.exists === true || UI.selectedTile.waterhole > 0) {
 		console.log('Can\'t play there');
 		return false;
 	} else if (GAME.board.colorRider(color) === color) {
@@ -914,7 +907,7 @@ function riderExists (tile_arr) {
 function oasisExists (tile_arr) {
 	//Tells you if an oasis in the tiles specified in the "tile_arr"
 	for (var i = 0; i < tile_arr.length; i++) {
-		if (tile_arr[i].oasis === true) {
+		if (tile_arr[i].oasis.exists === true) {
 			return tile_arr[i];
 		}
 	}
@@ -993,6 +986,7 @@ function resetVisited () {
 }
 
 function getVisitedFlag (rider) {
+	// Takes a rider array containing rider color and rider owner and returns the apporpriate flag
 	var index = 0;
 	switch (rider[0]){
 		case 'Mint':
